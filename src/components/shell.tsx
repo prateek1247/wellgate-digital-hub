@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   Layers,
   Library,
-  Users,
   ClipboardCheck,
   BarChart3,
   UserCog,
@@ -81,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b border-border bg-card/50 backdrop-blur px-6 flex items-center gap-4">
           <div className="text-sm font-semibold tracking-tight">
-            WDPGS <span className="text-muted-foreground font-normal">Digital Command Center</span>
+            Well Delivery Project Gate system
           </div>
           <div className="ml-6 flex-1 max-w-2xl relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
