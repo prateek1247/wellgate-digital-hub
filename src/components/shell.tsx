@@ -22,15 +22,14 @@ import {
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/projects", label: "Projects", icon: FolderKanban },
-  { to: "/dsp", label: "DSP Workspace", icon: FileStack },
-  { to: "/stage-gates", label: "Stage Gate Tracker", icon: GitBranch },
-  { to: "/cpa", label: "CPA Governance", icon: ShieldCheck },
-  { to: "/templates", label: "Templates & Rules", icon: Layers },
+  { to: "/dsp", label: "Workload", icon: FileStack },
+  { to: "/templates", label: "Templates and Rules", icon: Layers },
   { to: "/activities", label: "Activity Library", icon: Library },
-  { to: "/teams", label: "Teams & RACI", icon: Users },
-  { to: "/approvals", label: "Approvals / Gate Reviews", icon: ClipboardCheck },
-  { to: "/reports", label: "Reports & KPIs", icon: BarChart3 },
-  { to: "/admin", label: "User Access / Admin", icon: UserCog },
+  { to: "/stage-gates", label: "Governance", icon: GitBranch },
+  { to: "/admin", label: "User Access", icon: UserCog },
+  { to: "/approvals", label: "Approvals", icon: ClipboardCheck },
+  { to: "/cpa", label: "CPA Governance", icon: ShieldCheck },
+  { to: "/reports", label: "Reports and KPIs", icon: BarChart3 },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
