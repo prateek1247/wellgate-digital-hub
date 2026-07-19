@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DspRouteImport } from './routes/dsp'
 import { Route as CpaRouteImport } from './routes/cpa'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StageGatesRoute = StageGatesRouteImport.update({
   id: '/stage-gates',
   path: '/stage-gates',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,21 @@ export interface FileRoutesById {
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates'
+  fullPaths: '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates' | '/templates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates'
-  id: '__root__' | '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates'
+  to: '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates' | '/templates'
+  id:
+    | '__root__'
+    | '/'
+    | '/cpa'
+    | '/dsp'
+    | '/projects'
+    | '/stage-gates'
+    | '/templates'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +93,18 @@ export interface RootRouteChildren {
   DspRoute: typeof DspRoute
   ProjectsRoute: typeof ProjectsRoute
   StageGatesRoute: typeof StageGatesRoute
+  TemplatesRoute: typeof TemplatesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stage-gates': {
       id: '/stage-gates'
       path: '/stage-gates'
@@ -125,6 +149,7 @@ const rootRouteChildren: RootRouteChildren = {
   DspRoute: DspRoute,
   ProjectsRoute: ProjectsRoute,
   StageGatesRoute: StageGatesRoute,
+  TemplatesRoute: TemplatesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
