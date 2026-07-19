@@ -15,6 +15,7 @@ import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DspRouteImport } from './routes/dsp'
 import { Route as CpaRouteImport } from './routes/cpa'
+import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -48,6 +49,11 @@ const CpaRoute = CpaRouteImport.update({
   path: '/cpa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApprovalsRoute = ApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ActivitiesRoute = ActivitiesRouteImport.update({
   id: '/activities',
   path: '/activities',
@@ -62,6 +68,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
+  '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
+  '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
+  '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activities'
+    | '/approvals'
     | '/cpa'
     | '/dsp'
     | '/projects'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activities'
+    | '/approvals'
     | '/cpa'
     | '/dsp'
     | '/projects'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activities'
+    | '/approvals'
     | '/cpa'
     | '/dsp'
     | '/projects'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivitiesRoute: typeof ActivitiesRoute
+  ApprovalsRoute: typeof ApprovalsRoute
   CpaRoute: typeof CpaRoute
   DspRoute: typeof DspRoute
   ProjectsRoute: typeof ProjectsRoute
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CpaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/approvals': {
+      id: '/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof ApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/activities': {
       id: '/activities'
       path: '/activities'
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivitiesRoute: ActivitiesRoute,
+  ApprovalsRoute: ApprovalsRoute,
   CpaRoute: CpaRoute,
   DspRoute: DspRoute,
   ProjectsRoute: ProjectsRoute,
