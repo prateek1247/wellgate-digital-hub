@@ -9,8 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemplatesRouteImport } from './routes/templates'
+import { Route as TeamsRouteImport } from './routes/teams'
+import { Route as StageGatesRouteImport } from './routes/stage-gates'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as DspRouteImport } from './routes/dsp'
+import { Route as CpaRouteImport } from './routes/cpa'
+import { Route as ApprovalsRouteImport } from './routes/approvals'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamsRoute = TeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StageGatesRoute = StageGatesRouteImport.update({
+  id: '/stage-gates',
+  path: '/stage-gates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DspRoute = DspRouteImport.update({
+  id: '/dsp',
+  path: '/dsp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CpaRoute = CpaRouteImport.update({
+  id: '/cpa',
+  path: '/cpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApprovalsRoute = ApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActivitiesRoute = ActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +79,172 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activities': typeof ActivitiesRoute
+  '/admin': typeof AdminRoute
+  '/approvals': typeof ApprovalsRoute
+  '/cpa': typeof CpaRoute
+  '/dsp': typeof DspRoute
+  '/projects': typeof ProjectsRoute
+  '/reports': typeof ReportsRoute
+  '/stage-gates': typeof StageGatesRoute
+  '/teams': typeof TeamsRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activities': typeof ActivitiesRoute
+  '/admin': typeof AdminRoute
+  '/approvals': typeof ApprovalsRoute
+  '/cpa': typeof CpaRoute
+  '/dsp': typeof DspRoute
+  '/projects': typeof ProjectsRoute
+  '/reports': typeof ReportsRoute
+  '/stage-gates': typeof StageGatesRoute
+  '/teams': typeof TeamsRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activities': typeof ActivitiesRoute
+  '/admin': typeof AdminRoute
+  '/approvals': typeof ApprovalsRoute
+  '/cpa': typeof CpaRoute
+  '/dsp': typeof DspRoute
+  '/projects': typeof ProjectsRoute
+  '/reports': typeof ReportsRoute
+  '/stage-gates': typeof StageGatesRoute
+  '/teams': typeof TeamsRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/activities'
+    | '/admin'
+    | '/approvals'
+    | '/cpa'
+    | '/dsp'
+    | '/projects'
+    | '/reports'
+    | '/stage-gates'
+    | '/teams'
+    | '/templates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/activities'
+    | '/admin'
+    | '/approvals'
+    | '/cpa'
+    | '/dsp'
+    | '/projects'
+    | '/reports'
+    | '/stage-gates'
+    | '/teams'
+    | '/templates'
+  id:
+    | '__root__'
+    | '/'
+    | '/activities'
+    | '/admin'
+    | '/approvals'
+    | '/cpa'
+    | '/dsp'
+    | '/projects'
+    | '/reports'
+    | '/stage-gates'
+    | '/teams'
+    | '/templates'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActivitiesRoute: typeof ActivitiesRoute
+  AdminRoute: typeof AdminRoute
+  ApprovalsRoute: typeof ApprovalsRoute
+  CpaRoute: typeof CpaRoute
+  DspRoute: typeof DspRoute
+  ProjectsRoute: typeof ProjectsRoute
+  ReportsRoute: typeof ReportsRoute
+  StageGatesRoute: typeof StageGatesRoute
+  TeamsRoute: typeof TeamsRoute
+  TemplatesRoute: typeof TemplatesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teams': {
+      id: '/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof TeamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stage-gates': {
+      id: '/stage-gates'
+      path: '/stage-gates'
+      fullPath: '/stage-gates'
+      preLoaderRoute: typeof StageGatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dsp': {
+      id: '/dsp'
+      path: '/dsp'
+      fullPath: '/dsp'
+      preLoaderRoute: typeof DspRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cpa': {
+      id: '/cpa'
+      path: '/cpa'
+      fullPath: '/cpa'
+      preLoaderRoute: typeof CpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/approvals': {
+      id: '/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof ApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activities': {
+      id: '/activities'
+      path: '/activities'
+      fullPath: '/activities'
+      preLoaderRoute: typeof ActivitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +257,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActivitiesRoute: ActivitiesRoute,
+  AdminRoute: AdminRoute,
+  ApprovalsRoute: ApprovalsRoute,
+  CpaRoute: CpaRoute,
+  DspRoute: DspRoute,
+  ProjectsRoute: ProjectsRoute,
+  ReportsRoute: ReportsRoute,
+  StageGatesRoute: StageGatesRoute,
+  TeamsRoute: TeamsRoute,
+  TemplatesRoute: TemplatesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
