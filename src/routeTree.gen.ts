@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DspRouteImport } from './routes/dsp'
+import { Route as CpaRouteImport } from './routes/cpa'
 import { Route as IndexRouteImport } from './routes/index'
 
 const StageGatesRoute = StageGatesRouteImport.update({
@@ -29,6 +30,11 @@ const DspRoute = DspRouteImport.update({
   path: '/dsp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CpaRoute = CpaRouteImport.update({
+  id: '/cpa',
+  path: '/cpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cpa': typeof CpaRoute
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cpa': typeof CpaRoute
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cpa': typeof CpaRoute
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dsp' | '/projects' | '/stage-gates'
+  fullPaths: '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dsp' | '/projects' | '/stage-gates'
-  id: '__root__' | '/' | '/dsp' | '/projects' | '/stage-gates'
+  to: '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates'
+  id: '__root__' | '/' | '/cpa' | '/dsp' | '/projects' | '/stage-gates'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CpaRoute: typeof CpaRoute
   DspRoute: typeof DspRoute
   ProjectsRoute: typeof ProjectsRoute
   StageGatesRoute: typeof StageGatesRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DspRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cpa': {
+      id: '/cpa'
+      path: '/cpa'
+      fullPath: '/cpa'
+      preLoaderRoute: typeof CpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CpaRoute: CpaRoute,
   DspRoute: DspRoute,
   ProjectsRoute: ProjectsRoute,
   StageGatesRoute: StageGatesRoute,
