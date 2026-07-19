@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemplatesRouteImport } from './routes/templates'
+import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DspRouteImport } from './routes/dsp'
@@ -20,6 +21,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamsRoute = TeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StageGatesRoute = StageGatesRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
+  '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
+  '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/stage-gates': typeof StageGatesRoute
+  '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/dsp'
     | '/projects'
     | '/stage-gates'
+    | '/teams'
     | '/templates'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/dsp'
     | '/projects'
     | '/stage-gates'
+    | '/teams'
     | '/templates'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/dsp'
     | '/projects'
     | '/stage-gates'
+    | '/teams'
     | '/templates'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   DspRoute: typeof DspRoute
   ProjectsRoute: typeof ProjectsRoute
   StageGatesRoute: typeof StageGatesRoute
+  TeamsRoute: typeof TeamsRoute
   TemplatesRoute: typeof TemplatesRoute
 }
 
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/templates'
       fullPath: '/templates'
       preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teams': {
+      id: '/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof TeamsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stage-gates': {
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   DspRoute: DspRoute,
   ProjectsRoute: ProjectsRoute,
   StageGatesRoute: StageGatesRoute,
+  TeamsRoute: TeamsRoute,
   TemplatesRoute: TemplatesRoute,
 }
 export const routeTree = rootRouteImport
