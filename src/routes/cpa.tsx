@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
+import { projects } from "@/lib/mock";
 import { Check, X, AlertTriangle, FileDown, Send } from "lucide-react";
 
 export const Route = createFileRoute("/cpa")({
@@ -125,6 +127,65 @@ function Cpa(){
           </div>
         </Panel>
       </div>
+
+      <ProjectTracker />
     </div>
+  );
+}
+
+function ProjectTracker() {
+  const stages = ["SG1", "SG2", "SG3.1", "SG3.2"] as const;
+  const [remarks, setRemarks] = useState<Record<string, Record<string, string>>>(() => {
+    const seed: Record<string, Record<string, string>> = {};
+    projects.forEach(p => {
+      seed[p.code] = {
+        SG1: p.stageGate !== "SG1" ? "Closed — deliverables accepted with 2 minor comments carried forward." : "",
+        SG2: p.stageGate === "SG3.1" || p.stageGate === "SG3.2" ? "Closed — concept ranking endorsed. Refer to CPA memo 2026/04-11." : "",
+        "SG3.1": p.stageGate === "SG3.2" ? "Closed — design deliverables verified." : "",
+        "SG3.2": "",
+      };
+    });
+    return seed;
+  });
+  const [openProject, setOpenProject] = useState<string>(projects[0].code);
+  const update = (code: string, stage: string, val: string) =>
+    setRemarks({ ...remarks, [code]: { ...remarks[code], [stage]: val } });
+
+  return (
+    <Panel className="mt-5 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="text-sm font-semibold">Project Tracker</div>
+          <div className="text-xs text-muted-foreground">Per-project stage gate closure remarks captured by CPA for audit traceability.</div>
+        </div>
+        <select value={openProject} onChange={e => setOpenProject(e.target.value)} className="h-8 rounded border border-border bg-input/60 text-xs px-2">
+          {projects.map(p => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
+        </select>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        {stages.map(s => {
+          const current = projects.find(p => p.code === openProject)!;
+          const isPast = stages.indexOf(s) < stages.indexOf(current.stageGate as any);
+          const isCurrent = s === current.stageGate;
+          const tone = isPast ? "green" : isCurrent ? "orange" : "grey";
+          return (
+            <div key={s} className="border border-border rounded-lg p-3 bg-secondary/20">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs font-semibold">{s}</div>
+                <StatusTag tone={tone as any}>{isPast ? "Closed" : isCurrent ? "In Progress" : "Upcoming"}</StatusTag>
+              </div>
+              <label className="text-[10px] text-muted-foreground">Closure Remark</label>
+              <textarea
+                value={remarks[openProject]?.[s] ?? ""}
+                onChange={e => update(openProject, s, e.target.value)}
+                placeholder={isPast ? "Add closure remark…" : "Awaiting stage completion"}
+                className="mt-1 w-full min-h-[80px] p-2 rounded border border-border bg-input/60 text-xs"
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 text-[10px] text-muted-foreground italic">Closure remarks are CPA record-of-decision notes — they do not override Gate Keeper authority.</div>
+    </Panel>
   );
 }

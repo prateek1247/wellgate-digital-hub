@@ -30,7 +30,7 @@ function Index() {
       />
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-6">
         {kpis.map((k) => (
           <Panel key={k.label} className="p-4">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground leading-tight">{k.label}</div>
@@ -50,8 +50,16 @@ function Index() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
         {projects.map((p) => {
           const statusTone = p.status === "On Track" ? "green" : p.status === "At Risk" ? "orange" : p.status === "Delayed" ? "red" : "grey";
+          const today = new Date();
+          const start = new Date(p.startDate);
+          const end = new Date(p.endDate);
+          const totalMs = end.getTime() - start.getTime();
+          const rawPct = ((today.getTime() - start.getTime()) / totalMs) * 100;
+          const todayPct = Math.max(0, Math.min(100, rawPct));
+          const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
           return (
-            <Panel key={p.code} className="p-5 hover:border-primary/40 transition">
+            <Link key={p.code} to="/workload" className="block">
+            <Panel className="p-5 hover:border-primary/40 transition cursor-pointer">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="text-[11px] font-mono text-primary tracking-wider">{p.code}</div>
@@ -70,10 +78,20 @@ function Index() {
 
               <div className="mt-4">
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1">
-                  <span>Progress</span><span className="tabular-nums">{p.progress}%</span>
+                  <span>Timeline</span><span className="tabular-nums">{p.progress}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-primary" style={{ width: `${p.progress}%` }} />
+                <div className="relative h-2 rounded-full bg-secondary overflow-visible">
+                  <div className="h-full rounded-full bg-primary/70" style={{ width: `${p.progress}%` }} />
+                  <div
+                    className="absolute top-[-4px] bottom-[-4px] w-[2px] bg-[color:var(--status-red)]"
+                    style={{ left: `${todayPct}%` }}
+                    title={`Today · ${fmt(today)}`}
+                  />
+                </div>
+                <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground tabular-nums">
+                  <span>Start · {fmt(start)}</span>
+                  <span className="text-[color:var(--status-red)]">Today · {fmt(today)}</span>
+                  <span>End · {fmt(end)}</span>
                 </div>
               </div>
 
@@ -90,6 +108,7 @@ function Index() {
                 </span>
               </div>
             </Panel>
+            </Link>
           );
         })}
       </div>

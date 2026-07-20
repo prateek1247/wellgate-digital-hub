@@ -9,18 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkloadRouteImport } from './routes/workload'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as DspRouteImport } from './routes/dsp'
 import { Route as CpaRouteImport } from './routes/cpa'
 import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorkloadRoute = WorkloadRouteImport.update({
+  id: '/workload',
+  path: '/workload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
@@ -44,11 +49,6 @@ const ReportsRoute = ReportsRouteImport.update({
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DspRoute = DspRouteImport.update({
-  id: '/dsp',
-  path: '/dsp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CpaRoute = CpaRouteImport.update({
@@ -83,12 +83,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
-  '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
+  '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -96,12 +96,12 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
-  '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
+  '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -110,12 +110,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
-  '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
+  '/workload': typeof WorkloadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -125,12 +125,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/approvals'
     | '/cpa'
-    | '/dsp'
     | '/projects'
     | '/reports'
     | '/stage-gates'
     | '/teams'
     | '/templates'
+    | '/workload'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,12 +138,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/approvals'
     | '/cpa'
-    | '/dsp'
     | '/projects'
     | '/reports'
     | '/stage-gates'
     | '/teams'
     | '/templates'
+    | '/workload'
   id:
     | '__root__'
     | '/'
@@ -151,12 +151,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/approvals'
     | '/cpa'
-    | '/dsp'
     | '/projects'
     | '/reports'
     | '/stage-gates'
     | '/teams'
     | '/templates'
+    | '/workload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,16 +165,23 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ApprovalsRoute: typeof ApprovalsRoute
   CpaRoute: typeof CpaRoute
-  DspRoute: typeof DspRoute
   ProjectsRoute: typeof ProjectsRoute
   ReportsRoute: typeof ReportsRoute
   StageGatesRoute: typeof StageGatesRoute
   TeamsRoute: typeof TeamsRoute
   TemplatesRoute: typeof TemplatesRoute
+  WorkloadRoute: typeof WorkloadRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workload': {
+      id: '/workload'
+      path: '/workload'
+      fullPath: '/workload'
+      preLoaderRoute: typeof WorkloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates': {
       id: '/templates'
       path: '/templates'
@@ -208,13 +215,6 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dsp': {
-      id: '/dsp'
-      path: '/dsp'
-      fullPath: '/dsp'
-      preLoaderRoute: typeof DspRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cpa': {
@@ -261,23 +261,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ApprovalsRoute: ApprovalsRoute,
   CpaRoute: CpaRoute,
-  DspRoute: DspRoute,
   ProjectsRoute: ProjectsRoute,
   ReportsRoute: ReportsRoute,
   StageGatesRoute: StageGatesRoute,
   TeamsRoute: TeamsRoute,
   TemplatesRoute: TemplatesRoute,
+  WorkloadRoute: WorkloadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
