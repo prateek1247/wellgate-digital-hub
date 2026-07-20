@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
 import { allTeams, projects } from "@/lib/mock";
 import { FilePlus, Edit3, Check, Plus, X, Eye } from "lucide-react";
@@ -170,7 +170,7 @@ function Templates(){
   );
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4">
       <div className="w-full max-w-4xl bg-card border border-border rounded-xl overflow-hidden max-h-[85vh] flex flex-col">
