@@ -14,7 +14,6 @@ import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as DspRouteImport } from './routes/dsp'
 import { Route as CpaRouteImport } from './routes/cpa'
 import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -44,11 +43,6 @@ const ReportsRoute = ReportsRouteImport.update({
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DspRoute = DspRouteImport.update({
-  id: '/dsp',
-  path: '/dsp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CpaRoute = CpaRouteImport.update({
@@ -83,7 +77,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
-  '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
@@ -96,7 +89,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
-  '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
@@ -110,7 +102,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
   '/cpa': typeof CpaRoute
-  '/dsp': typeof DspRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
@@ -125,7 +116,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/approvals'
     | '/cpa'
-    | '/dsp'
     | '/projects'
     | '/reports'
     | '/stage-gates'
@@ -138,7 +128,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/approvals'
     | '/cpa'
-    | '/dsp'
     | '/projects'
     | '/reports'
     | '/stage-gates'
@@ -151,7 +140,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/approvals'
     | '/cpa'
-    | '/dsp'
     | '/projects'
     | '/reports'
     | '/stage-gates'
@@ -165,7 +153,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ApprovalsRoute: typeof ApprovalsRoute
   CpaRoute: typeof CpaRoute
-  DspRoute: typeof DspRoute
   ProjectsRoute: typeof ProjectsRoute
   ReportsRoute: typeof ReportsRoute
   StageGatesRoute: typeof StageGatesRoute
@@ -208,13 +195,6 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dsp': {
-      id: '/dsp'
-      path: '/dsp'
-      fullPath: '/dsp'
-      preLoaderRoute: typeof DspRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cpa': {
@@ -261,7 +241,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ApprovalsRoute: ApprovalsRoute,
   CpaRoute: CpaRoute,
-  DspRoute: DspRoute,
   ProjectsRoute: ProjectsRoute,
   ReportsRoute: ReportsRoute,
   StageGatesRoute: StageGatesRoute,
