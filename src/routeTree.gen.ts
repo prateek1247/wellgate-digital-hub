@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkloadRouteImport } from './routes/workload'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
@@ -20,6 +21,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorkloadRoute = WorkloadRouteImport.update({
+  id: '/workload',
+  path: '/workload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
+  '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
+  '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
+  '/workload': typeof WorkloadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/stage-gates'
     | '/teams'
     | '/templates'
+    | '/workload'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/stage-gates'
     | '/teams'
     | '/templates'
+    | '/workload'
   id:
     | '__root__'
     | '/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/stage-gates'
     | '/teams'
     | '/templates'
+    | '/workload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,10 +170,18 @@ export interface RootRouteChildren {
   StageGatesRoute: typeof StageGatesRoute
   TeamsRoute: typeof TeamsRoute
   TemplatesRoute: typeof TemplatesRoute
+  WorkloadRoute: typeof WorkloadRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workload': {
+      id: '/workload'
+      path: '/workload'
+      fullPath: '/workload'
+      preLoaderRoute: typeof WorkloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates': {
       id: '/templates'
       path: '/templates'
@@ -246,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   StageGatesRoute: StageGatesRoute,
   TeamsRoute: TeamsRoute,
   TemplatesRoute: TemplatesRoute,
+  WorkloadRoute: WorkloadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
