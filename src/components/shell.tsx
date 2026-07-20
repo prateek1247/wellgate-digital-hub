@@ -15,13 +15,12 @@ import {
   Bell,
   HelpCircle,
   Globe,
-  ChevronDown,
 } from "lucide-react";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/projects", label: "Projects", icon: FolderKanban },
-  { to: "/dsp", label: "Workload", icon: FileStack },
+  { to: "/workload", label: "Workload", icon: FileStack },
   { to: "/templates", label: "Templates and Rules", icon: Layers },
   { to: "/activities", label: "Activity Library", icon: Library },
   { to: "/stage-gates", label: "Governance", icon: GitBranch },
@@ -89,10 +88,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               placeholder="Search project, well, DSP, stage gate, team…"
             />
           </div>
-          <button className="hidden lg:flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-secondary/40 text-xs text-foreground/90 hover:bg-secondary">
-            Role: IE
-            <ChevronDown className="h-3.5 w-3.5 opacity-70" />
-          </button>
+          <div className="hidden lg:flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-secondary/40 text-xs text-foreground/90">
+            <span className="text-muted-foreground">Role:</span>
+            <span className="font-medium">IE</span>
+          </div>
           <button className="h-9 w-9 grid place-items-center rounded-md border border-border hover:bg-secondary text-muted-foreground relative">
             <Bell className="h-4 w-4" />
             <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[color:var(--status-orange)]" />
