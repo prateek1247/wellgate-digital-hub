@@ -261,7 +261,7 @@ function ProjectsPage() {
           <table className="w-full text-sm">
             <thead className="bg-secondary/40 text-xs text-muted-foreground uppercase tracking-wider">
               <tr>
-                {["","Project Name","Status","Start Date","End Date","Duration"].map(h=>(<th key={h} className="text-left px-4 py-3 font-medium">{h}</th>))}
+                {["","Project Name","Stage Gate","Status","Start Date","End Date","Duration"].map(h=>(<th key={h} className="text-left px-4 py-3 font-medium">{h}</th>))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -269,6 +269,7 @@ function ProjectsPage() {
                 <tr key={i} className="hover:bg-secondary/30">
                   <td className="px-4 py-3 w-8"><Star className={`h-3.5 w-3.5 ${p.favourite?"fill-[color:var(--accent-blue)] text-[color:var(--accent-blue)]":"text-muted-foreground/40"}`}/></td>
                   <td className="px-4 py-3 font-medium">{p.name}</td>
+                  <td className="px-4 py-3"><span className={`inline-flex items-center h-6 px-2 rounded border text-[11px] font-medium ${stageTone(p.stageGate)}`}>{p.stageGate}</span></td>
                   <td className="px-4 py-3"><span className={`inline-flex items-center h-6 px-2 rounded border text-[11px] ${statusTone(p.status)}`}>{p.status}</span></td>
                   <td className="px-4 py-3 text-muted-foreground tabular-nums">{p.start}</td>
                   <td className="px-4 py-3 text-muted-foreground tabular-nums">{p.end}</td>
