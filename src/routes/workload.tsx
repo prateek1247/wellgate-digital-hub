@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
 import {
   projects,
@@ -645,7 +645,7 @@ function ValidationRulesPanel() {
 
 /* ------------------------------ Modals -------------------------------------- */
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4">
       <div className="w-full max-w-3xl bg-card border border-border rounded-xl overflow-hidden max-h-[80vh] flex flex-col">
