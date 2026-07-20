@@ -56,7 +56,7 @@ function Index() {
           const totalMs = end.getTime() - start.getTime();
           const rawPct = ((today.getTime() - start.getTime()) / totalMs) * 100;
           const todayPct = Math.max(0, Math.min(100, rawPct));
-          const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", yyyy: "numeric" } as any);
+          const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
           return (
             <Link
               key={p.code}
