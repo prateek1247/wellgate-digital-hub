@@ -58,12 +58,7 @@ function Index() {
           const todayPct = Math.max(0, Math.min(100, rawPct));
           const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
           return (
-            <Link
-              key={p.code}
-              to="/workload"
-              search={{ project: p.code, stage: p.stageGate } as any}
-              className="block"
-            >
+            <Link key={p.code} to="/workload" className="block">
             <Panel className="p-5 hover:border-primary/40 transition cursor-pointer">
               <div className="flex items-start justify-between">
                 <div>
