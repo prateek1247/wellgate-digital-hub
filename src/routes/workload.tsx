@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
 import {
   projects,
@@ -58,8 +58,7 @@ function WorkloadPage() {
   const [version, setVersion] = useState(stageVersions[stage][0]);
   const [tab, setTab] = useState<"activities" | "dsp">("activities");
   const [activities, setActivities] = useState<WorkActivity[]>(workActivitiesByStage[stage]);
-  // reset activities when stage changes
-  useMemo(() => setActivities(workActivitiesByStage[stage]), [stage]);
+  useEffect(() => { setActivities(workActivitiesByStage[stage]); }, [stage]);
 
   const [reminderFor, setReminderFor] = useState<{ kind: "activity" | "section"; id: string; label: string } | null>(null);
   const [commentsModal, setCommentsModal] = useState(false);
