@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
 import {
@@ -24,7 +24,6 @@ import {
   ChevronRight,
   ChevronDown,
   History,
-  MessageSquare,
   X,
   ImageIcon,
   Table as TableIcon,
