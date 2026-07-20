@@ -26,39 +26,40 @@ type TLProject = {
   status: TLStatus;
   start: string; // dd.mm.yyyy
   end: string;
+  stageGate: "SG1" | "SG2" | "SG3.1";
   favourite?: boolean;
   mine?: boolean;
 };
 
 const timelineProjects: TLProject[] = [
-  { name: "Viking Exploration well", status: "Initiating", start: "22.01.2026", end: "01.04.2027", favourite: true, mine: true },
-  { name: "King development well 1", status: "Initiating", start: "01.07.2026", end: "28.09.2027", favourite: true },
-  { name: "Exploration Well Alpha", status: "Initiating", start: "01.10.2026", end: "29.12.2027", favourite: true, mine: true },
-  { name: "Exploration Well Beta", status: "Initiating", start: "02.10.2026", end: "29.01.2028", favourite: true },
-  { name: "Exploration Well Zulu", status: "Initiating", start: "01.12.2026", end: "28.02.2028" },
-  { name: "Permian - 20 Well PAD", status: "Initiating", start: "12.05.2026", end: "06.10.2026", mine: true },
-  { name: "Rockies - Multi PAD Wells", status: "Initiating", start: "24.02.2026", end: "19.01.2027" },
-  { name: "Rig plan", status: "Initiating", start: "01.01.2026", end: "13.02.2026" },
-  { name: "SC Demo", status: "Initiating", start: "16.12.2025", end: "30.09.2026", favourite: true },
-  { name: "Test1", status: "Initiating", start: "01.01.2026", end: "31.03.2027" },
-  { name: "Burgan Infill Program", status: "Active", start: "10.03.2026", end: "18.11.2027" },
-  { name: "Raudhatain Deep Gas", status: "Active", start: "05.04.2026", end: "22.02.2028" },
-  { name: "Sabriyah Water Injector", status: "Planned", start: "01.09.2026", end: "10.06.2027" },
-  { name: "Umm Gudair Cluster A", status: "Active", start: "18.02.2026", end: "30.07.2027" },
-  { name: "Minagish Sour Gas Pilot", status: "Planned", start: "12.11.2026", end: "05.09.2027" },
-  { name: "Ratqa Heavy Oil Phase 2", status: "Active", start: "20.05.2026", end: "01.12.2027" },
-  { name: "North Kuwait Gas Lift", status: "Initiating", start: "01.02.2026", end: "15.09.2026" },
-  { name: "Bahra Development Wells", status: "Initiating", start: "10.06.2026", end: "22.04.2027", mine: true },
-  { name: "Wafra Joint Wells", status: "Initiating", start: "05.08.2026", end: "18.10.2027" },
-  { name: "Ahmadi Workover Batch", status: "Initiating", start: "14.03.2026", end: "30.08.2026" },
-  { name: "Jurassic Deep Test 4", status: "Initiating", start: "22.09.2026", end: "12.05.2027" },
-  { name: "Sabriyah Multi-Pad B", status: "Initiating", start: "01.11.2026", end: "20.12.2027" },
-  { name: "Rawdhatain HP Well Release", status: "Initiating", start: "08.04.2026", end: "16.10.2026" },
-  { name: "Marat Deep Exploration", status: "Initiating", start: "18.07.2026", end: "05.03.2028" },
-  { name: "West Kuwait Slim Hole", status: "Initiating", start: "26.01.2026", end: "14.11.2026" },
-  { name: "Umm Niqa Appraisal", status: "Initiating", start: "03.10.2026", end: "22.09.2027" },
-  { name: "Kra Al-Maru Step-out", status: "Initiating", start: "15.05.2026", end: "10.02.2027" },
-  { name: "Greater Burgan Pad-27", status: "Initiating", start: "01.03.2026", end: "01.09.2027" },
+  { name: "Viking Exploration well", status: "Initiating", start: "22.01.2026", end: "01.04.2027", stageGate: "SG1", favourite: true, mine: true },
+  { name: "King development well 1", status: "Initiating", start: "01.07.2026", end: "28.09.2027", stageGate: "SG1", favourite: true },
+  { name: "Exploration Well Alpha", status: "Initiating", start: "01.10.2026", end: "29.12.2027", stageGate: "SG2", favourite: true, mine: true },
+  { name: "Exploration Well Beta", status: "Initiating", start: "02.10.2026", end: "29.01.2028", stageGate: "SG2", favourite: true },
+  { name: "Exploration Well Zulu", status: "Initiating", start: "01.12.2026", end: "28.02.2028", stageGate: "SG1" },
+  { name: "Permian - 20 Well PAD", status: "Initiating", start: "12.05.2026", end: "06.10.2026", stageGate: "SG3.1", mine: true },
+  { name: "Rockies - Multi PAD Wells", status: "Initiating", start: "24.02.2026", end: "19.01.2027", stageGate: "SG2" },
+  { name: "Rig plan", status: "Initiating", start: "01.01.2026", end: "13.02.2026", stageGate: "SG3.1" },
+  { name: "SC Demo", status: "Initiating", start: "16.12.2025", end: "30.09.2026", stageGate: "SG2", favourite: true },
+  { name: "Test1", status: "Initiating", start: "01.01.2026", end: "31.03.2027", stageGate: "SG1" },
+  { name: "Burgan Infill Program", status: "Active", start: "10.03.2026", end: "18.11.2027", stageGate: "SG3.1" },
+  { name: "Raudhatain Deep Gas", status: "Active", start: "05.04.2026", end: "22.02.2028", stageGate: "SG2" },
+  { name: "Sabriyah Water Injector", status: "Planned", start: "01.09.2026", end: "10.06.2027", stageGate: "SG1" },
+  { name: "Umm Gudair Cluster A", status: "Active", start: "18.02.2026", end: "30.07.2027", stageGate: "SG3.1" },
+  { name: "Minagish Sour Gas Pilot", status: "Planned", start: "12.11.2026", end: "05.09.2027", stageGate: "SG2" },
+  { name: "Ratqa Heavy Oil Phase 2", status: "Active", start: "20.05.2026", end: "01.12.2027", stageGate: "SG3.1" },
+  { name: "North Kuwait Gas Lift", status: "Initiating", start: "01.02.2026", end: "15.09.2026", stageGate: "SG1" },
+  { name: "Bahra Development Wells", status: "Initiating", start: "10.06.2026", end: "22.04.2027", stageGate: "SG1", mine: true },
+  { name: "Wafra Joint Wells", status: "Initiating", start: "05.08.2026", end: "18.10.2027", stageGate: "SG2" },
+  { name: "Ahmadi Workover Batch", status: "Initiating", start: "14.03.2026", end: "30.08.2026", stageGate: "SG3.1" },
+  { name: "Jurassic Deep Test 4", status: "Initiating", start: "22.09.2026", end: "12.05.2027", stageGate: "SG1" },
+  { name: "Sabriyah Multi-Pad B", status: "Initiating", start: "01.11.2026", end: "20.12.2027", stageGate: "SG1" },
+  { name: "Rawdhatain HP Well Release", status: "Initiating", start: "08.04.2026", end: "16.10.2026", stageGate: "SG2" },
+  { name: "Marat Deep Exploration", status: "Initiating", start: "18.07.2026", end: "05.03.2028", stageGate: "SG1" },
+  { name: "West Kuwait Slim Hole", status: "Initiating", start: "26.01.2026", end: "14.11.2026", stageGate: "SG3.1" },
+  { name: "Umm Niqa Appraisal", status: "Initiating", start: "03.10.2026", end: "22.09.2027", stageGate: "SG2" },
+  { name: "Kra Al-Maru Step-out", status: "Initiating", start: "15.05.2026", end: "10.02.2027", stageGate: "SG2" },
+  { name: "Greater Burgan Pad-27", status: "Initiating", start: "01.03.2026", end: "01.09.2027", stageGate: "SG3.1" },
 ];
 
 const QUARTERS: { label: string; year: number; q: number }[] = (() => {
@@ -77,6 +78,20 @@ function toQIndex(d: string): number {
   const idx = QUARTERS.findIndex((x) => x.year === yyyy && x.q === q);
   if (idx < 0) return 0;
   return idx + frac;
+}
+
+function todayQIndex(): number {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return toQIndex(`${dd}.${mm}.${yyyy}`);
+}
+
+function stageTone(s: "SG1"|"SG2"|"SG3.1") {
+  if (s === "SG1") return "border-primary/40 text-primary bg-primary/10";
+  if (s === "SG2") return "border-[color:var(--status-orange)]/40 text-[color:var(--status-orange)] bg-[color:var(--status-orange)]/10";
+  return "border-[color:var(--status-green)]/40 text-[color:var(--status-green)] bg-[color:var(--status-green)]/10";
 }
 
 function statusTone(s: TLStatus) {
@@ -133,6 +148,7 @@ function ProjectsPage() {
   };
 
   const gridWidth = QUARTERS.length * zoom;
+  const todayLeft = todayQIndex() * zoom;
 
   return (
     <div className="p-6 xl:p-8 max-w-[1800px] mx-auto">
@@ -186,6 +202,7 @@ function ProjectsPage() {
             <div style={{ minWidth: 570 + gridWidth }}>
               <div className="flex sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground">
                 <div className="w-[240px] shrink-0 px-4 py-3 font-medium">Project Name</div>
+                <div className="w-[90px] shrink-0 px-3 py-3 font-medium">Stage Gate</div>
                 <div className="w-[110px] shrink-0 px-3 py-3 font-medium">Status</div>
                 <div className="w-[110px] shrink-0 px-3 py-3 font-medium">Start Date</div>
                 <div className="w-[110px] shrink-0 px-3 py-3 font-medium border-r border-border">End Date</div>
@@ -206,6 +223,9 @@ function ProjectsPage() {
                       <Star className={`h-3.5 w-3.5 shrink-0 ${p.favourite ? "fill-[color:var(--accent-blue)] text-[color:var(--accent-blue)]" : "text-muted-foreground/40"}`}/>
                       <span className="truncate text-sm font-medium">{p.name}</span>
                     </div>
+                    <div className="w-[90px] shrink-0 px-3 py-3">
+                      <span className={`inline-flex items-center h-6 px-2 rounded border text-[11px] font-medium ${stageTone(p.stageGate)}`}>{p.stageGate}</span>
+                    </div>
                     <div className="w-[110px] shrink-0 px-3 py-3">
                       <span className={`inline-flex items-center h-6 px-2 rounded border text-[11px] ${statusTone(p.status)}`}>{p.status}</span>
                     </div>
@@ -222,6 +242,11 @@ function ProjectsPage() {
                       >
                         <span className="truncate">{p.name}</span>
                       </div>
+                      <div
+                        className="absolute top-0 bottom-0 w-[2px] bg-[color:var(--status-red)] pointer-events-none z-20"
+                        style={{ left: todayLeft }}
+                        title="Today"
+                      />
                     </div>
                   </div>
                 );
