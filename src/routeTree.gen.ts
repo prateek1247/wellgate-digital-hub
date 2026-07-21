@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkloadRouteImport } from './routes/workload'
+import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -23,6 +24,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WorkloadRoute = WorkloadRouteImport.update({
   id: '/workload',
   path: '/workload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeamsRoute = TeamsRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
+  '/templates': typeof TemplatesRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
+  '/templates': typeof TemplatesRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
+  '/templates': typeof TemplatesRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/stage-gates'
     | '/teams'
+    | '/templates'
     | '/workload'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/stage-gates'
     | '/teams'
+    | '/templates'
     | '/workload'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/stage-gates'
     | '/teams'
+    | '/templates'
     | '/workload'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   StageGatesRoute: typeof StageGatesRoute
   TeamsRoute: typeof TeamsRoute
+  TemplatesRoute: typeof TemplatesRoute
   WorkloadRoute: typeof WorkloadRoute
 }
 
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/workload'
       fullPath: '/workload'
       preLoaderRoute: typeof WorkloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teams': {
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   StageGatesRoute: StageGatesRoute,
   TeamsRoute: TeamsRoute,
+  TemplatesRoute: TemplatesRoute,
   WorkloadRoute: WorkloadRoute,
 }
 export const routeTree = rootRouteImport
