@@ -10,12 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkloadRouteImport } from './routes/workload'
-import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StageGatesRouteImport } from './routes/stage-gates'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as CpaRouteImport } from './routes/cpa'
 import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivitiesRouteImport } from './routes/activities'
@@ -24,11 +22,6 @@ import { Route as IndexRouteImport } from './routes/index'
 const WorkloadRoute = WorkloadRouteImport.update({
   id: '/workload',
   path: '/workload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TemplatesRoute = TemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeamsRoute = TeamsRouteImport.update({
@@ -49,11 +42,6 @@ const ReportsRoute = ReportsRouteImport.update({
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CpaRoute = CpaRouteImport.update({
-  id: '/cpa',
-  path: '/cpa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApprovalsRoute = ApprovalsRouteImport.update({
@@ -82,12 +70,10 @@ export interface FileRoutesByFullPath {
   '/activities': typeof ActivitiesRoute
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
-  '/cpa': typeof CpaRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
-  '/templates': typeof TemplatesRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesByTo {
@@ -95,12 +81,10 @@ export interface FileRoutesByTo {
   '/activities': typeof ActivitiesRoute
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
-  '/cpa': typeof CpaRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
-  '/templates': typeof TemplatesRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesById {
@@ -109,12 +93,10 @@ export interface FileRoutesById {
   '/activities': typeof ActivitiesRoute
   '/admin': typeof AdminRoute
   '/approvals': typeof ApprovalsRoute
-  '/cpa': typeof CpaRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/stage-gates': typeof StageGatesRoute
   '/teams': typeof TeamsRoute
-  '/templates': typeof TemplatesRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRouteTypes {
@@ -124,12 +106,10 @@ export interface FileRouteTypes {
     | '/activities'
     | '/admin'
     | '/approvals'
-    | '/cpa'
     | '/projects'
     | '/reports'
     | '/stage-gates'
     | '/teams'
-    | '/templates'
     | '/workload'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -137,12 +117,10 @@ export interface FileRouteTypes {
     | '/activities'
     | '/admin'
     | '/approvals'
-    | '/cpa'
     | '/projects'
     | '/reports'
     | '/stage-gates'
     | '/teams'
-    | '/templates'
     | '/workload'
   id:
     | '__root__'
@@ -150,12 +128,10 @@ export interface FileRouteTypes {
     | '/activities'
     | '/admin'
     | '/approvals'
-    | '/cpa'
     | '/projects'
     | '/reports'
     | '/stage-gates'
     | '/teams'
-    | '/templates'
     | '/workload'
   fileRoutesById: FileRoutesById
 }
@@ -164,12 +140,10 @@ export interface RootRouteChildren {
   ActivitiesRoute: typeof ActivitiesRoute
   AdminRoute: typeof AdminRoute
   ApprovalsRoute: typeof ApprovalsRoute
-  CpaRoute: typeof CpaRoute
   ProjectsRoute: typeof ProjectsRoute
   ReportsRoute: typeof ReportsRoute
   StageGatesRoute: typeof StageGatesRoute
   TeamsRoute: typeof TeamsRoute
-  TemplatesRoute: typeof TemplatesRoute
   WorkloadRoute: typeof WorkloadRoute
 }
 
@@ -180,13 +154,6 @@ declare module '@tanstack/react-router' {
       path: '/workload'
       fullPath: '/workload'
       preLoaderRoute: typeof WorkloadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates': {
-      id: '/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof TemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teams': {
@@ -215,13 +182,6 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cpa': {
-      id: '/cpa'
-      path: '/cpa'
-      fullPath: '/cpa'
-      preLoaderRoute: typeof CpaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/approvals': {
@@ -260,24 +220,12 @@ const rootRouteChildren: RootRouteChildren = {
   ActivitiesRoute: ActivitiesRoute,
   AdminRoute: AdminRoute,
   ApprovalsRoute: ApprovalsRoute,
-  CpaRoute: CpaRoute,
   ProjectsRoute: ProjectsRoute,
   ReportsRoute: ReportsRoute,
   StageGatesRoute: StageGatesRoute,
   TeamsRoute: TeamsRoute,
-  TemplatesRoute: TemplatesRoute,
   WorkloadRoute: WorkloadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
