@@ -22,6 +22,8 @@ type ProjectTemplate = {
   validationRuleset: string;
   raci: string;
   reportsBySG: Record<SG, string[]>;
+  assuranceReport: string;
+  reviewPack: string;
 };
 
 const initialProjectTemplates: ProjectTemplate[] = [
@@ -49,6 +51,8 @@ const dspTemplateOptions = ["DSP 1.0 v4.1","DSP 2.0 Development v3.6","DSP 2.0 E
 const activityTemplateOptions = ["Development Wells Activities v2.1","Exploration Activities v1.8","Multi-Well Pad Activities v1.4"];
 const validationOptions = ["Standard Ruleset v1.4","Strict Ruleset v2.0","Exploratory Ruleset v1.1"];
 const raciOptions = ["Well Delivery RACI v2.0","Exploration RACI v1.6"];
+const assuranceReportOptions = ["CPA Assurance Report v3.0","CPA Assurance Report — Exploration v1.2","CPA Assurance Report — Multi-Well Pad v1.0"];
+const reviewPackOptions = ["Gate Review Pack v2.4","Gate Review Pack — Exploration v1.3","Gate Review Pack — Multi-Well Pad v1.1"];
 
 const initialDspTemplates = [
   { id:"dt-1", name:"DSP 1.0 Identification", sg:"SG1" as SG, sections:36, v:"4.1" },
