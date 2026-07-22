@@ -32,18 +32,24 @@ const initialProjectTemplates: ProjectTemplate[] = [
     dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Development v3.6", "SG3.1":"DSP 3.1 v5.0" },
     activityTemplate:"Development Wells Activities v2.1", validationRuleset:"Standard Ruleset v1.4", raci:"Well Delivery RACI v2.0",
     reportsBySG: { SG1:["SG1 Identification Report"], SG2:["Concept Options Report","Long Lead Item Report"], "SG3.1":["Design Pack","RAROC Summary"] },
+    assuranceReport: "CPA Assurance Report v3.0",
+    reviewPack: "Gate Review Pack v2.4",
   },
   {
     id:"pt-expl", name:"Exploration Wells Template", v:"2.1", status:"Active",
     dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Exploration v2.4", "SG3.1":"DSP 3.1 v5.0" },
     activityTemplate:"Exploration Activities v1.8", validationRuleset:"Exploratory Ruleset v1.1", raci:"Exploration RACI v1.6",
     reportsBySG: { SG1:["Exploration Prospect Note"], SG2:["Feasibility Report"], "SG3.1":["Design & PEEP Pack"] },
+    assuranceReport: "CPA Assurance Report — Exploration v1.2",
+    reviewPack: "Gate Review Pack — Exploration v1.3",
   },
   {
     id:"pt-multi", name:"Multi-Well Pad Template", v:"2.0", status:"Active",
     dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Development v3.6", "SG3.1":"DSP 3.1 v5.0" },
     activityTemplate:"Multi-Well Pad Activities v1.4", validationRuleset:"Standard Ruleset v1.4", raci:"Well Delivery RACI v2.0",
     reportsBySG: { SG1:["Pad Identification Report"], SG2:["Pad Concept Report"], "SG3.1":["Pad Design Pack"] },
+    assuranceReport: "CPA Assurance Report — Multi-Well Pad v1.0",
+    reviewPack: "Gate Review Pack — Multi-Well Pad v1.1",
   },
 ];
 
@@ -181,7 +187,7 @@ function Templates(){
         <>
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs text-muted-foreground">All project templates. Each defines a DSP template per SG1/SG2/SG3.1, an activity template, a validation ruleset, RACI, and one or more report templates per stage gate.</div>
-            <button onClick={()=>setProjectTemplates([...projectTemplates, { id:`pt-new-${Date.now()}`, name:"New Project Template", v:"0.1", status:"Draft", dspBySG:{SG1:dspTemplateOptions[0],SG2:dspTemplateOptions[1],"SG3.1":dspTemplateOptions[3]}, activityTemplate:activityTemplateOptions[0], validationRuleset:validationOptions[0], raci:raciOptions[0], reportsBySG:{SG1:[],SG2:[],"SG3.1":[]}}])} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1"><Plus className="h-3.5 w-3.5"/>Add Project Template</button>
+            <button onClick={()=>setProjectTemplates([...projectTemplates, { id:`pt-new-${Date.now()}`, name:"New Project Template", v:"0.1", status:"Draft", dspBySG:{SG1:dspTemplateOptions[0],SG2:dspTemplateOptions[1],"SG3.1":dspTemplateOptions[3]}, activityTemplate:activityTemplateOptions[0], validationRuleset:validationOptions[0], raci:raciOptions[0], reportsBySG:{SG1:[],SG2:[],"SG3.1":[]}, assuranceReport:assuranceReportOptions[0], reviewPack:reviewPackOptions[0]}])} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1"><Plus className="h-3.5 w-3.5"/>Add Project Template</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {projectTemplates.map(t=>(
