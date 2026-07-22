@@ -203,6 +203,10 @@ function Templates(){
                   {STAGE_GATES.map(sg=>(
                     <div key={sg}><span className="text-foreground font-medium">{sg}:</span> {t.dspBySG[sg]} · {t.reportsBySG[sg]?.length ?? 0} report{(t.reportsBySG[sg]?.length ?? 0)===1?"":"s"}</div>
                   ))}
+                  <div className="pt-1 mt-1 border-t border-border/50">
+                    <div><span className="text-foreground font-medium">Assurance Report:</span> {t.assuranceReport}</div>
+                    <div><span className="text-foreground font-medium">Review Pack:</span> {t.reviewPack}</div>
+                  </div>
                 </div>
                 <div className="mt-4 flex gap-2 flex-wrap">
                   <button onClick={()=>setEditProjectTemplate(t.id)} className="h-8 px-3 rounded-md border border-border text-xs flex items-center gap-1.5"><Edit3 className="h-3.5 w-3.5"/>Edit</button>
