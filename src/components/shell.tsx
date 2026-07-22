@@ -138,7 +138,7 @@ export function StatusTag({ tone, children }: { tone: "green" | "orange" | "red"
   );
 }
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
+export function PageHeader({ title, subtitle, actions }: { title: ReactNode; subtitle?: string; actions?: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 mb-6">
       <div>
