@@ -388,6 +388,18 @@ function EditProjectTemplateModal({ template, reportOptions, onSave, onClose }: 
             {raciOptions.map(o=><option key={o}>{o}</option>)}
           </select>
         </label>
+        <label className="text-xs">
+          <div className="text-muted-foreground mb-1">Assurance Report Template</div>
+          <select value={draft.assuranceReport} onChange={e=>setDraft({...draft, assuranceReport:e.target.value})} className="h-9 w-full rounded border border-border bg-input/60 px-2 text-xs">
+            {assuranceReportOptions.map(o=><option key={o}>{o}</option>)}
+          </select>
+        </label>
+        <label className="text-xs">
+          <div className="text-muted-foreground mb-1">Review Pack Template</div>
+          <select value={draft.reviewPack} onChange={e=>setDraft({...draft, reviewPack:e.target.value})} className="h-9 w-full rounded border border-border bg-input/60 px-2 text-xs">
+            {reviewPackOptions.map(o=><option key={o}>{o}</option>)}
+          </select>
+        </label>
       </div>
 
       <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">DSP Template & Reports by Stage Gate</div>
