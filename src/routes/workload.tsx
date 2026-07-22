@@ -91,7 +91,7 @@ function WorkloadPage() {
   return (
     <div className="p-6 xl:p-8 max-w-[1800px] mx-auto">
       <PageHeader
-        title={<span className="flex items-baseline gap-2 flex-wrap">Workload<span className="text-base font-normal text-muted-foreground">· {project.code} — {project.name}</span></span> as any}
+        title={<span className="flex items-baseline gap-2 flex-wrap">Workload<span className="text-base font-normal text-muted-foreground">· {project.code} — {project.name}</span></span>}
         subtitle="Track activities and DSP preparation across stage gates. Advisory workspace — governance decisions remain off-platform."
         actions={
           <>
