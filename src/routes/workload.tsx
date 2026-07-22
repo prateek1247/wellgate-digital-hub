@@ -63,10 +63,35 @@ function WorkloadPage() {
   const [commentsModal, setCommentsModal] = useState(false);
   const [historyModal, setHistoryModal] = useState(false);
 
+  const WORKFLOW_STATUSES = ["Not Started","In Progress","Submitted to Planning","CPA Review","Corrections","Pending Gate Keeper Review","Completed"] as const;
+  type WFStatus = typeof WORKFLOW_STATUSES[number];
+  const [workflowStatus, setWorkflowStatus] = useState<WFStatus>("In Progress");
+  const statusTone: Record<WFStatus, "grey"|"orange"|"blue"|"yellow"|"green"> = {
+    "Not Started":"grey","In Progress":"orange","Submitted to Planning":"blue",
+    "CPA Review":"blue","Corrections":"yellow","Pending Gate Keeper Review":"yellow","Completed":"green"
+  };
+
+  // Lifted DSP editor state so CPA comments can deep-link to a section.
+  const dspKey = stageToDsp[stage];
+  const dspMeta = dspSections[dspKey];
+  const [dspNodes, setDspNodes] = useState<DspNode[]>(() => dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s })));
+  const [dspSelectedId, setDspSelectedId] = useState<string>("s-0");
+  useEffect(() => {
+    const next = dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s }));
+    setDspNodes(next);
+    setDspSelectedId(next[0]?.id ?? "");
+  }, [dspMeta]);
+
+  const openDspSection = (title: string) => {
+    setTab("dsp");
+    const match = findNodeByTitle(dspNodes, title);
+    if (match) setDspSelectedId(match.id);
+  };
+
   return (
     <div className="p-6 xl:p-8 max-w-[1800px] mx-auto">
       <PageHeader
-        title="Workload"
+        title={<span className="flex items-baseline gap-2 flex-wrap">Workload<span className="text-base font-normal text-muted-foreground">· {project.code} — {project.name}</span></span> as any}
         subtitle="Track activities and DSP preparation across stage gates. Advisory workspace — governance decisions remain off-platform."
         actions={
           <>
@@ -133,9 +158,22 @@ function WorkloadPage() {
       </Panel>
 
       {/* Section tabs */}
-      <div className="flex gap-1 mb-4 text-xs">
-        <button onClick={() => setTab("activities")} className={`px-3 py-2 rounded-md border ${tab === "activities" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>Activity Tracker</button>
-        <button onClick={() => setTab("dsp")} className={`px-3 py-2 rounded-md border ${tab === "dsp" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>DSP</button>
+      <div className="flex items-center gap-3 mb-4 text-xs flex-wrap">
+        <div className="flex gap-1">
+          <button onClick={() => setTab("activities")} className={`px-3 py-2 rounded-md border ${tab === "activities" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>Activity Tracker</button>
+          <button onClick={() => setTab("dsp")} className={`px-3 py-2 rounded-md border ${tab === "dsp" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>DSP</button>
+        </div>
+        <div className="flex items-center gap-2 pl-3 border-l border-border">
+          <span className="text-muted-foreground text-[11px]">Status</span>
+          <StatusTag tone={statusTone[workflowStatus]}>{workflowStatus}</StatusTag>
+          <select
+            value={workflowStatus}
+            onChange={e => setWorkflowStatus(e.target.value as WFStatus)}
+            className="h-7 px-1.5 rounded border border-border bg-input/60 text-[11px]"
+          >
+            {WORKFLOW_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4">
@@ -150,6 +188,10 @@ function WorkloadPage() {
           ) : (
             <DspEditor
               stage={stage}
+              sections={dspNodes}
+              setSections={setDspNodes}
+              selectedId={dspSelectedId}
+              setSelectedId={setDspSelectedId}
               openReminder={(id, label) => setReminderFor({ kind: "section", id, label })}
             />
           )}
@@ -157,7 +199,7 @@ function WorkloadPage() {
 
         <div className="col-span-12 xl:col-span-3 space-y-4">
           <WorkingComments onViewAll={() => setCommentsModal(true)} />
-          <CpaComments />
+          <CpaComments dspSectionTitles={dspNodes.map(n => n.title)} onOpenSection={openDspSection} />
           <SectionHistory onViewAll={() => setHistoryModal(true)} />
           <ValidationRulesPanel />
         </div>
