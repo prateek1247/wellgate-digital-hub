@@ -63,10 +63,35 @@ function WorkloadPage() {
   const [commentsModal, setCommentsModal] = useState(false);
   const [historyModal, setHistoryModal] = useState(false);
 
+  const WORKFLOW_STATUSES = ["Not Started","In Progress","Submitted to Planning","CPA Review","Corrections","Pending Gate Keeper Review","Completed"] as const;
+  type WFStatus = typeof WORKFLOW_STATUSES[number];
+  const [workflowStatus, setWorkflowStatus] = useState<WFStatus>("In Progress");
+  const statusTone: Record<WFStatus, "grey"|"orange"|"blue"|"yellow"|"green"> = {
+    "Not Started":"grey","In Progress":"orange","Submitted to Planning":"blue",
+    "CPA Review":"blue","Corrections":"yellow","Pending Gate Keeper Review":"yellow","Completed":"green"
+  };
+
+  // Lifted DSP editor state so CPA comments can deep-link to a section.
+  const dspKey = stageToDsp[stage];
+  const dspMeta = dspSections[dspKey];
+  const [dspNodes, setDspNodes] = useState<DspNode[]>(() => dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s })));
+  const [dspSelectedId, setDspSelectedId] = useState<string>("s-0");
+  useEffect(() => {
+    const next = dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s }));
+    setDspNodes(next);
+    setDspSelectedId(next[0]?.id ?? "");
+  }, [dspMeta]);
+
+  const openDspSection = (title: string) => {
+    setTab("dsp");
+    const match = findNodeByTitle(dspNodes, title);
+    if (match) setDspSelectedId(match.id);
+  };
+
   return (
     <div className="p-6 xl:p-8 max-w-[1800px] mx-auto">
       <PageHeader
-        title="Workload"
+        title={<span className="flex items-baseline gap-2 flex-wrap">Workload<span className="text-base font-normal text-muted-foreground">· {project.code} — {project.name}</span></span>}
         subtitle="Track activities and DSP preparation across stage gates. Advisory workspace — governance decisions remain off-platform."
         actions={
           <>
@@ -133,9 +158,22 @@ function WorkloadPage() {
       </Panel>
 
       {/* Section tabs */}
-      <div className="flex gap-1 mb-4 text-xs">
-        <button onClick={() => setTab("activities")} className={`px-3 py-2 rounded-md border ${tab === "activities" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>Activity Tracker</button>
-        <button onClick={() => setTab("dsp")} className={`px-3 py-2 rounded-md border ${tab === "dsp" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>DSP</button>
+      <div className="flex items-center gap-3 mb-4 text-xs flex-wrap">
+        <div className="flex gap-1">
+          <button onClick={() => setTab("activities")} className={`px-3 py-2 rounded-md border ${tab === "activities" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>Activity Tracker</button>
+          <button onClick={() => setTab("dsp")} className={`px-3 py-2 rounded-md border ${tab === "dsp" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>DSP</button>
+        </div>
+        <div className="flex items-center gap-2 pl-3 border-l border-border">
+          <span className="text-muted-foreground text-[11px]">Status</span>
+          <StatusTag tone={statusTone[workflowStatus]}>{workflowStatus}</StatusTag>
+          <select
+            value={workflowStatus}
+            onChange={e => setWorkflowStatus(e.target.value as WFStatus)}
+            className="h-7 px-1.5 rounded border border-border bg-input/60 text-[11px]"
+          >
+            {WORKFLOW_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4">
@@ -150,6 +188,10 @@ function WorkloadPage() {
           ) : (
             <DspEditor
               stage={stage}
+              sections={dspNodes}
+              setSections={setDspNodes}
+              selectedId={dspSelectedId}
+              setSelectedId={setDspSelectedId}
               openReminder={(id, label) => setReminderFor({ kind: "section", id, label })}
             />
           )}
@@ -157,7 +199,7 @@ function WorkloadPage() {
 
         <div className="col-span-12 xl:col-span-3 space-y-4">
           <WorkingComments onViewAll={() => setCommentsModal(true)} />
-          <CpaComments />
+          <CpaComments dspSectionTitles={dspNodes.map(n => n.title)} onOpenSection={openDspSection} />
           <SectionHistory onViewAll={() => setHistoryModal(true)} />
           <ValidationRulesPanel />
         </div>
@@ -301,14 +343,16 @@ function ActivityTracker({
 
 type DspNode = { id: string; title: string; children?: DspNode[]; assignedTeam?: string };
 
-function DspEditor({ stage, openReminder }: { stage: Stage; openReminder: (id: string, label: string) => void }) {
+function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder }: {
+  stage: Stage;
+  sections: DspNode[];
+  setSections: (s: DspNode[]) => void;
+  selectedId: string;
+  setSelectedId: (id: string) => void;
+  openReminder: (id: string, label: string) => void;
+}) {
   const dspKey = stageToDsp[stage];
   const meta = dspSections[dspKey];
-
-  const [sections, setSections] = useState<DspNode[]>(() =>
-    meta.sections.map((s, i) => ({ id: `s-${i}`, title: s }))
-  );
-  const [selectedId, setSelectedId] = useState<string>("s-0");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [blocks, setBlocks] = useState<Record<string, { type: "text" | "table" | "image"; content: string }[]>>({});
   const [targets, setTargets] = useState<Record<string, string>>({});
@@ -514,6 +558,15 @@ function findNode(nodes: DspNode[], id: string): DspNode | undefined {
     }
   }
 }
+function findNodeByTitle(nodes: DspNode[], title: string): DspNode | undefined {
+  for (const n of nodes) {
+    if (n.title === title) return n;
+    if (n.children) {
+      const c = findNodeByTitle(n.children, title);
+      if (c) return c;
+    }
+  }
+}
 function mapNode(n: DspNode, id: string, patch: Partial<DspNode>): DspNode {
   if (n.id === id) return { ...n, ...patch };
   if (n.children) return { ...n, children: n.children.map(c => mapNode(c, id, patch)) };
@@ -551,34 +604,83 @@ function WorkingComments({ onViewAll }: { onViewAll: () => void }) {
   );
 }
 
-function CpaComments() {
-  const [comments, setComments] = useState([
-    { id: "c1", c: "Provide justification for excluded option 3", assignedActivity: "", assignedSection: "", team: "FD Team" },
-    { id: "c2", c: "Clarify data acquisition scope for offset well #4", assignedActivity: "", assignedSection: "", team: "IE Team" },
+type CpaCommentStatus = "open" | "in-progress" | "completed";
+type CpaComment = {
+  id: string; c: string;
+  assignedActivity: string; assignedSection: string; team: string;
+  status: CpaCommentStatus; targetDate: string;
+};
+
+function CpaComments({ dspSectionTitles, onOpenSection }: { dspSectionTitles: string[]; onOpenSection: (title: string) => void }) {
+  const [comments, setComments] = useState<CpaComment[]>([
+    { id: "c1", c: "Provide justification for excluded option 3", assignedActivity: "", assignedSection: "", team: "FD Team", status: "open", targetDate: "" },
+    { id: "c2", c: "Clarify data acquisition scope for offset well #4", assignedActivity: "", assignedSection: "", team: "IE Team", status: "in-progress", targetDate: "2026-07-28" },
+    { id: "c3", c: "Update PAD allocations table with latest reservoir input", assignedActivity: "", assignedSection: "", team: "IE Team", status: "open", targetDate: "" },
+    { id: "c4", c: "Confirm HSE compliance signatures for high-risk activities", assignedActivity: "", assignedSection: "", team: "HSE Team", status: "open", targetDate: "2026-07-30" },
+    { id: "c5", c: "Attach directional company assessment", assignedActivity: "", assignedSection: "", team: "Drilling Team", status: "completed", targetDate: "2026-07-15" },
   ]);
-  const update = (id: string, patch: Partial<(typeof comments)[number]>) =>
+  const [expanded, setExpanded] = useState(false);
+  const update = (id: string, patch: Partial<CpaComment>) =>
     setComments(comments.map(c => (c.id === id ? { ...c, ...patch } : c)));
+
+  const visible = expanded ? comments : comments.slice(0, 2);
+  const openCount = comments.filter(c => c.status !== "completed").length;
 
   return (
     <Panel className="p-4">
       <div className="flex items-center justify-between mb-2">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CPA Comments</div>
-        <StatusTag tone="yellow">{comments.length} open</StatusTag>
+        <div className="flex items-center gap-1.5">
+          <StatusTag tone="blue">{comments.length} total</StatusTag>
+          <StatusTag tone="yellow">{openCount} open</StatusTag>
+        </div>
       </div>
       <div className="space-y-2">
-        {comments.map(x => (
-          <div key={x.id} className="border border-[color:var(--status-yellow)]/25 bg-[color:var(--status-yellow)]/5 rounded-md p-2.5 space-y-1.5">
-            <div className="text-xs">{x.c}</div>
-            <div className="grid grid-cols-1 gap-1">
-              <label className="text-[10px] text-muted-foreground">Assign to Activity
+        {visible.map(x => {
+          const tone = x.status === "completed" ? "green" : x.status === "in-progress" ? "orange" : "yellow";
+          return (
+            <div key={x.id} className="border border-[color:var(--status-yellow)]/25 bg-[color:var(--status-yellow)]/5 rounded-md p-2.5 space-y-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="text-xs flex-1">{x.c}</div>
+                <StatusTag tone={tone as any}>{x.status}</StatusTag>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <label className="text-[10px] text-muted-foreground">Status
+                  <select value={x.status} onChange={e => update(x.id, { status: e.target.value as CpaCommentStatus })}
+                    className="mt-0.5 h-6 w-full text-[11px] px-1 rounded border border-border bg-input/60">
+                    <option value="open">Open</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </label>
+                <label className="text-[10px] text-muted-foreground">Target Date
+                  <input type="date" value={x.targetDate} onChange={e => update(x.id, { targetDate: e.target.value })}
+                    className="mt-0.5 h-6 w-full text-[11px] px-1 rounded border border-border bg-input/60" />
+                </label>
+              </div>
+              <label className="text-[10px] text-muted-foreground block">Assign to Activity
                 <input value={x.assignedActivity} onChange={e => update(x.id, { assignedActivity: e.target.value })}
                   placeholder="e.g. 1.2 Preliminary SS X,Y" className="mt-0.5 h-6 w-full text-[11px] px-1.5 rounded border border-border bg-input/60" />
               </label>
-              <label className="text-[10px] text-muted-foreground">Assign to DSP Section
-                <input value={x.assignedSection} onChange={e => update(x.id, { assignedSection: e.target.value })}
-                  placeholder="e.g. Risk Register" className="mt-0.5 h-6 w-full text-[11px] px-1.5 rounded border border-border bg-input/60" />
-              </label>
-              <label className="text-[10px] text-muted-foreground">Assign to Team
+              <div className="text-[10px] text-muted-foreground">
+                <div>Assign to DSP Section</div>
+                <div className="flex gap-1 mt-0.5">
+                  <select value={x.assignedSection} onChange={e => update(x.id, { assignedSection: e.target.value })}
+                    className="h-6 flex-1 text-[11px] px-1 rounded border border-border bg-input/60">
+                    <option value="">— Select section —</option>
+                    {dspSectionTitles.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <button
+                    disabled={!x.assignedSection}
+                    onClick={() => onOpenSection(x.assignedSection)}
+                    className="h-6 px-2 text-[10px] rounded border border-primary/40 text-primary hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Open in DSP"
+                  >
+                    Open
+                  </button>
+                </div>
+              </div>
+              <label className="text-[10px] text-muted-foreground block">Assign to Team
                 <select value={x.team} onChange={e => update(x.id, { team: e.target.value })}
                   className="mt-0.5 h-6 w-full text-[11px] px-1 rounded border border-border bg-input/60">
                   <option value="">Unassigned</option>
@@ -586,9 +688,14 @@ function CpaComments() {
                 </select>
               </label>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+      {comments.length > 2 && (
+        <button onClick={() => setExpanded(!expanded)} className="mt-2 text-[11px] text-primary hover:underline">
+          {expanded ? "Show less" : `View more (${comments.length - 2})`}
+        </button>
+      )}
     </Panel>
   );
 }
