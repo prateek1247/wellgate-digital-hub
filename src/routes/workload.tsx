@@ -343,14 +343,16 @@ function ActivityTracker({
 
 type DspNode = { id: string; title: string; children?: DspNode[]; assignedTeam?: string };
 
-function DspEditor({ stage, openReminder }: { stage: Stage; openReminder: (id: string, label: string) => void }) {
+function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder }: {
+  stage: Stage;
+  sections: DspNode[];
+  setSections: (s: DspNode[]) => void;
+  selectedId: string;
+  setSelectedId: (id: string) => void;
+  openReminder: (id: string, label: string) => void;
+}) {
   const dspKey = stageToDsp[stage];
   const meta = dspSections[dspKey];
-
-  const [sections, setSections] = useState<DspNode[]>(() =>
-    meta.sections.map((s, i) => ({ id: `s-${i}`, title: s }))
-  );
-  const [selectedId, setSelectedId] = useState<string>("s-0");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [blocks, setBlocks] = useState<Record<string, { type: "text" | "table" | "image"; content: string }[]>>({});
   const [targets, setTargets] = useState<Record<string, string>>({});
