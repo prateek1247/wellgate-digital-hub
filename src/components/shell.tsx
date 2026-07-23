@@ -15,12 +15,14 @@ import {
   Bell,
   HelpCircle,
   Globe,
+  Wrench,
 } from "lucide-react";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/workload", label: "Workload", icon: FileStack },
+  { to: "/well-designs", label: "Automated Well Designs", icon: Wrench },
   { to: "/templates", label: "Templates and Rules", icon: Layers },
   { to: "/activities", label: "Activity Library", icon: Library },
   { to: "/stage-gates", label: "Governance", icon: GitBranch },
