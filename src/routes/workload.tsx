@@ -30,6 +30,11 @@ import {
   FileText,
   Play,
   Edit3,
+  Database,
+  Wrench,
+  RefreshCw,
+  Folder,
+  ChevronsRight,
 } from "lucide-react";
 
 type Stage = "SG1" | "SG2" | "SG3.1" | "SG3.2";
