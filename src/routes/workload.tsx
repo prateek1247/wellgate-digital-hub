@@ -359,8 +359,11 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
   const dspKey = stageToDsp[stage];
   const meta = dspSections[dspKey];
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [blocks, setBlocks] = useState<Record<string, { type: "text" | "table" | "image"; content: string }[]>>({});
+  const [blocks, setBlocks] = useState<Record<string, ContentBlock[]>>({});
   const [targets, setTargets] = useState<Record<string, string>>({});
+  const [edmOpen, setEdmOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [validationTick, setValidationTick] = useState(0);
 
   const selected = findNode(sections, selectedId);
 
@@ -378,14 +381,20 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
     setSections(sections.map(s => mapNode(s, id, patch)));
   };
 
-  const addBlock = (id: string, type: "text" | "table" | "image") => {
+  const addBlock = (id: string, type: ContentBlock["type"], payload?: Partial<ContentBlock>) => {
     const arr = blocks[id] ?? [];
-    setBlocks({ ...blocks, [id]: [...arr, { type, content: type === "text" ? "" : "" }] });
+    setBlocks({ ...blocks, [id]: [...arr, { type, content: "", ...payload }] });
   };
   const updateBlock = (id: string, i: number, content: string) => {
     const arr = [...(blocks[id] ?? [])];
     arr[i] = { ...arr[i], content };
     setBlocks({ ...blocks, [id]: arr });
+  };
+  const importFromEdm = (payload: { trajectory: string; casing: string }) => {
+    if (!selected) return;
+    addBlock(selected.id, "trajectory", { content: payload.trajectory });
+    addBlock(selected.id, "casing", { content: payload.casing });
+    setEdmOpen(false);
   };
 
   return (
@@ -467,17 +476,37 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
 
               <div className="mt-5">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs text-muted-foreground">Content</div>
-                  <div className="flex gap-1">
+                  <div className="text-xs text-muted-foreground flex items-center gap-2">
+                    Content
+                    <button
+                      title="Engineering check rules"
+                      onClick={() => setRulesOpen(true)}
+                      className="h-6 w-6 grid place-items-center rounded border border-border hover:bg-secondary text-primary"
+                    >
+                      <Wrench className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <div className="flex gap-1 flex-wrap">
                     <button onClick={() => addBlock(selected.id, "text")} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary"><FileText className="h-3 w-3" />Text</button>
-                    <button onClick={() => addBlock(selected.id, "table")} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary"><TableIcon className="h-3 w-3" />Table</button>
                     <button onClick={() => addBlock(selected.id, "image")} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary"><ImageIcon className="h-3 w-3" />Image</button>
+                    <button onClick={() => addBlock(selected.id, "table")} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary"><TableIcon className="h-3 w-3" />Table</button>
+                    <button onClick={() => setEdmOpen(true)} className="h-7 px-2 rounded border border-primary/40 text-[10px] flex items-center gap-1 text-primary hover:bg-primary/10">
+                      <Database className="h-3 w-3" />Import from EDM
+                    </button>
+                    <button onClick={() => setValidationTick(v => v + 1)} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary" title="Re-run validation on changes">
+                      <RefreshCw className="h-3 w-3" />Re-run validation
+                    </button>
                   </div>
                 </div>
+                {validationTick > 0 && (
+                  <div className="mb-2 text-[10px] text-[color:var(--status-green)] flex items-center gap-1">
+                    <ShieldAlert className="h-3 w-3" /> Validation re-run #{validationTick} · trajectory & casing checks refreshed
+                  </div>
+                )}
                 <div className="space-y-2">
                   {(blocks[selected.id] ?? []).length === 0 && (
                     <div className="text-[11px] text-muted-foreground italic border border-dashed border-border rounded p-4 text-center">
-                      No content yet — add text, tables, or images.
+                      No content yet — add text, tables, images, or import from EDM.
                     </div>
                   )}
                   {(blocks[selected.id] ?? []).map((b, i) => (
@@ -489,11 +518,15 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
           )}
         </div>
       </div>
+      {edmOpen && <EdmImportModal onClose={() => setEdmOpen(false)} onImport={importFromEdm} />}
+      {rulesOpen && <EngineeringRulesModal onClose={() => setRulesOpen(false)} />}
     </>
   );
 }
 
-function BlockEditor({ block, onChange }: { block: { type: "text" | "table" | "image"; content: string }; onChange: (c: string) => void }) {
+type ContentBlock = { type: "text" | "table" | "image" | "trajectory" | "casing"; content: string };
+
+function BlockEditor({ block, onChange }: { block: ContentBlock; onChange: (c: string) => void }) {
   if (block.type === "text") {
     return (
       <textarea
@@ -515,6 +548,32 @@ function BlockEditor({ block, onChange }: { block: { type: "text" | "table" | "i
       </div>
     );
   }
+  if (block.type === "trajectory") {
+    return (
+      <div className="rounded border border-primary/30 bg-primary/5 overflow-hidden">
+        <div className="text-[10px] px-2 py-1 bg-primary/10 text-primary border-b border-primary/30 flex items-center gap-1.5">
+          <Database className="h-3 w-3" /> EDM · Trajectory — {block.content || "NK-224 Design R3"}
+        </div>
+        <div className="grid grid-cols-2 gap-2 p-3">
+          <TrajectoryTopView />
+          <TrajectorySectionView />
+        </div>
+      </div>
+    );
+  }
+  if (block.type === "casing") {
+    return (
+      <div className="rounded border border-primary/30 bg-primary/5 overflow-hidden">
+        <div className="text-[10px] px-2 py-1 bg-primary/10 text-primary border-b border-primary/30 flex items-center gap-1.5">
+          <Database className="h-3 w-3" /> EDM · Casing Design — {block.content || "NK-224 Design R3"}
+        </div>
+        <div className="p-3 space-y-2">
+          <CasingLoadTable />
+          <CasingDesignLimitPlot />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="rounded border border-dashed border-border p-6 text-center bg-secondary/20">
       <ImageIcon className="h-6 w-6 mx-auto text-muted-foreground" />
@@ -522,6 +581,279 @@ function BlockEditor({ block, onChange }: { block: { type: "text" | "table" | "i
     </div>
   );
 }
+
+/* ------------------------------ EDM Import ---------------------------------- */
+
+const edmTree = {
+  Company: "Kuwait Oil Company",
+  projects: [
+    {
+      name: "NKDP", sites: [
+        { name: "North Kuwait Site 12", wells: [
+          { name: "NK-224", wellbores: [
+            { name: "NK-224 OH", designs: ["Design R1", "Design R2", "Design R3 (latest)"] },
+            { name: "NK-224 ST1", designs: ["Sidetrack v1"] },
+          ]},
+          { name: "NK-225", wellbores: [{ name: "NK-225 OH", designs: ["Design R1"] }] },
+        ]},
+      ],
+    },
+    { name: "MBP2", sites: [{ name: "West Kuwait Pad A", wells: [{ name: "MB-118", wellbores: [{ name: "MB-118 OH", designs: ["Design v2"] }] }] }] },
+  ],
+};
+
+function EdmImportModal({ onClose, onImport }: { onClose: () => void; onImport: (p: { trajectory: string; casing: string }) => void }) {
+  const [selProj, setSelProj] = useState(edmTree.projects[0].name);
+  const [selSite, setSelSite] = useState(edmTree.projects[0].sites[0].name);
+  const [selWell, setSelWell] = useState(edmTree.projects[0].sites[0].wells[0].name);
+  const [selWellbore, setSelWellbore] = useState(edmTree.projects[0].sites[0].wells[0].wellbores[0].name);
+  const [selDesign, setSelDesign] = useState<string | null>(null);
+
+  const project = edmTree.projects.find(p => p.name === selProj)!;
+  const site = project.sites.find(s => s.name === selSite) ?? project.sites[0];
+  const well = site.wells.find(w => w.name === selWell) ?? site.wells[0];
+  const wellbore = well.wellbores.find(w => w.name === selWellbore) ?? well.wellbores[0];
+
+  const [tab, setTab] = useState<"trajectory" | "casing">("trajectory");
+
+  return (
+    <Modal title="Import from EDM Database" onClose={onClose}>
+      {/* Breadcrumb hierarchy */}
+      <div className="flex items-center gap-1 text-[11px] text-muted-foreground mb-3 flex-wrap">
+        <Folder className="h-3 w-3" />
+        <span className="text-foreground/80">{edmTree.Company}</span>
+        <ChevronsRight className="h-3 w-3" /> <span>{selProj}</span>
+        <ChevronsRight className="h-3 w-3" /> <span>{selSite}</span>
+        <ChevronsRight className="h-3 w-3" /> <span>{selWell}</span>
+        <ChevronsRight className="h-3 w-3" /> <span>{selWellbore}</span>
+        {selDesign && <><ChevronsRight className="h-3 w-3" /> <span className="text-primary">{selDesign}</span></>}
+      </div>
+
+      {/* Hierarchy selectors */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        <EdmSelect label="Project" value={selProj} options={edmTree.projects.map(p => p.name)} onChange={v => {
+          const p = edmTree.projects.find(x => x.name === v)!;
+          setSelProj(v); setSelSite(p.sites[0].name); setSelWell(p.sites[0].wells[0].name); setSelWellbore(p.sites[0].wells[0].wellbores[0].name); setSelDesign(null);
+        }} />
+        <EdmSelect label="Site" value={selSite} options={project.sites.map(s => s.name)} onChange={v => {
+          const s = project.sites.find(x => x.name === v)!;
+          setSelSite(v); setSelWell(s.wells[0].name); setSelWellbore(s.wells[0].wellbores[0].name); setSelDesign(null);
+        }} />
+        <EdmSelect label="Well" value={selWell} options={site.wells.map(w => w.name)} onChange={v => {
+          const w = site.wells.find(x => x.name === v)!;
+          setSelWell(v); setSelWellbore(w.wellbores[0].name); setSelDesign(null);
+        }} />
+        <EdmSelect label="Wellbore" value={selWellbore} options={well.wellbores.map(w => w.name)} onChange={v => { setSelWellbore(v); setSelDesign(null); }} />
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Designs</div>
+        <div className="flex gap-1 flex-wrap">
+          {wellbore.designs.map(d => (
+            <button key={d} onClick={() => setSelDesign(d)} className={`text-[11px] px-2 py-1 rounded border ${selDesign === d ? "bg-primary/15 border-primary/40 text-primary" : "border-border hover:bg-secondary"}`}>
+              {d}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {selDesign ? (
+        <>
+          <div className="flex gap-1 mb-2 text-xs">
+            <button onClick={() => setTab("trajectory")} className={`px-3 py-1.5 rounded border ${tab === "trajectory" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground"}`}>Trajectory</button>
+            <button onClick={() => setTab("casing")} className={`px-3 py-1.5 rounded border ${tab === "casing" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground"}`}>Casing Design</button>
+          </div>
+
+          {tab === "trajectory" ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-[10px] text-muted-foreground mb-1">Top View</div>
+                  <TrajectoryTopView />
+                </div>
+                <div>
+                  <div className="text-[10px] text-muted-foreground mb-1">Section View</div>
+                  <TrajectorySectionView />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-muted-foreground mb-1">Anticollision Results</div>
+                <AnticollisionTable />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <div className="text-[10px] text-muted-foreground mb-1">Casing Load Details</div>
+                <CasingLoadTable />
+              </div>
+              <div>
+                <div className="text-[10px] text-muted-foreground mb-1">Design Limit Plot</div>
+                <CasingDesignLimitPlot />
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button onClick={onClose} className="h-8 px-3 rounded border border-border text-xs">Cancel</button>
+            <button
+              onClick={() => onImport({ trajectory: `${selWell} ${selDesign}`, casing: `${selWell} ${selDesign}` })}
+              className="h-8 px-3 rounded bg-primary text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <Database className="h-3.5 w-3.5" /> Import to DSP Content
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="text-[11px] text-muted-foreground italic border border-dashed border-border rounded p-6 text-center">
+          Select a design above to preview trajectory and casing data.
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function EdmSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
+  return (
+    <label className="text-[10px] text-muted-foreground block">
+      {label}
+      <select value={value} onChange={e => onChange(e.target.value)} className="mt-0.5 h-8 w-full text-[11px] px-2 rounded border border-border bg-input/60">
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function TrajectoryTopView() {
+  return (
+    <svg viewBox="0 0 200 140" className="w-full h-32 rounded border border-border bg-secondary/20">
+      <g stroke="var(--border)" strokeWidth="0.3">
+        {Array.from({length: 8}).map((_,i)=><line key={`h${i}`} x1="0" x2="200" y1={i*20} y2={i*20}/>)}
+        {Array.from({length: 11}).map((_,i)=><line key={`v${i}`} y1="0" y2="140" x1={i*20} x2={i*20}/>)}
+      </g>
+      <circle cx="40" cy="70" r="3" fill="var(--primary)" />
+      <path d="M40,70 C 80,70 120,60 170,40" stroke="var(--primary)" strokeWidth="1.5" fill="none" />
+      <circle cx="170" cy="40" r="2.5" fill="var(--status-orange)" />
+      <text x="6" y="12" fontSize="7" fill="var(--muted-foreground)">Top view (N/E)</text>
+    </svg>
+  );
+}
+function TrajectorySectionView() {
+  return (
+    <svg viewBox="0 0 200 140" className="w-full h-32 rounded border border-border bg-secondary/20">
+      <g stroke="var(--border)" strokeWidth="0.3">
+        {Array.from({length: 8}).map((_,i)=><line key={`h${i}`} x1="0" x2="200" y1={i*20} y2={i*20}/>)}
+      </g>
+      <path d="M20,10 L20,60 C 20,90 60,110 180,120" stroke="var(--primary)" strokeWidth="1.5" fill="none" />
+      <text x="6" y="12" fontSize="7" fill="var(--muted-foreground)">Vertical section (TVD)</text>
+    </svg>
+  );
+}
+function AnticollisionTable() {
+  const rows = [
+    { offset: "NK-223", md: "1250 m", sf: 4.8, status: "pass" },
+    { offset: "NK-225", md: "1820 m", sf: 2.1, status: "warn" },
+    { offset: "NK-228 ST1", md: "2410 m", sf: 6.3, status: "pass" },
+  ];
+  return (
+    <table className="w-full text-[11px] border border-border rounded">
+      <thead className="bg-secondary/30 text-muted-foreground">
+        <tr>{["Offset Well","Min MD","Separation Factor","Status"].map(h=><th key={h} className="text-left px-2 py-1">{h}</th>)}</tr>
+      </thead>
+      <tbody>
+        {rows.map(r=>(
+          <tr key={r.offset} className="border-t border-border">
+            <td className="px-2 py-1">{r.offset}</td>
+            <td className="px-2 py-1">{r.md}</td>
+            <td className="px-2 py-1 tabular-nums">{r.sf}</td>
+            <td className="px-2 py-1"><StatusTag tone={r.status==="pass"?"green":"orange"}>{r.status.toUpperCase()}</StatusTag></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+function CasingLoadTable() {
+  const rows = [
+    { section: "30\" Conductor",  od: "30\"",   grade: "X-52",  weight: "310 ppf", shoe: "80 m",   burst: 1450, collapse: 890 },
+    { section: "20\" Surface",    od: "20\"",   grade: "K-55",  weight: "133 ppf", shoe: "650 m",  burst: 3060, collapse: 1500 },
+    { section: "13-3/8\" Interm.", od: "13-3/8\"", grade: "N-80",  weight: "72 ppf",  shoe: "1850 m", burst: 5380, collapse: 2260 },
+    { section: "9-5/8\" Prod.",   od: "9-5/8\"", grade: "P-110", weight: "53.5 ppf",shoe: "3120 m", burst: 10900,collapse: 7830 },
+  ];
+  return (
+    <table className="w-full text-[11px] border border-border rounded">
+      <thead className="bg-secondary/30 text-muted-foreground">
+        <tr>{["Section","OD","Grade","Weight","Shoe","Burst (psi)","Collapse (psi)"].map(h=><th key={h} className="text-left px-2 py-1">{h}</th>)}</tr>
+      </thead>
+      <tbody>
+        {rows.map(r=>(
+          <tr key={r.section} className="border-t border-border">
+            <td className="px-2 py-1 font-medium">{r.section}</td>
+            <td className="px-2 py-1">{r.od}</td>
+            <td className="px-2 py-1">{r.grade}</td>
+            <td className="px-2 py-1">{r.weight}</td>
+            <td className="px-2 py-1">{r.shoe}</td>
+            <td className="px-2 py-1 tabular-nums">{r.burst}</td>
+            <td className="px-2 py-1 tabular-nums">{r.collapse}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+function CasingDesignLimitPlot() {
+  return (
+    <svg viewBox="0 0 220 140" className="w-full h-40 rounded border border-border bg-secondary/20">
+      <g stroke="var(--border)" strokeWidth="0.3">
+        {Array.from({length: 8}).map((_,i)=><line key={`h${i}`} x1="20" x2="210" y1={20+i*15} y2={20+i*15}/>)}
+        {Array.from({length: 8}).map((_,i)=><line key={`v${i}`} y1="20" y2="125" x1={20+i*27} x2={20+i*27}/>)}
+      </g>
+      <polygon points="20,20 210,20 210,125 20,125" fill="none" stroke="var(--status-green)" strokeDasharray="3 2" strokeWidth="1"/>
+      <polygon points="40,40 190,40 190,110 40,110" fill="var(--primary)/10" stroke="var(--primary)" strokeWidth="1"/>
+      <circle cx="80" cy="70" r="2.5" fill="var(--status-green)"/>
+      <circle cx="120" cy="55" r="2.5" fill="var(--status-green)"/>
+      <circle cx="160" cy="95" r="2.5" fill="var(--status-orange)"/>
+      <text x="22" y="16" fontSize="7" fill="var(--muted-foreground)">Design envelope · burst vs collapse</text>
+    </svg>
+  );
+}
+
+/* ------------------------------ Engineering Rules --------------------------- */
+
+function EngineeringRulesModal({ onClose }: { onClose: () => void }) {
+  const rules = [
+    { id:"ER-01", area:"Trajectory", rule:"DLS ≤ 4°/30m across production zones", state:"pass" },
+    { id:"ER-02", area:"Trajectory", rule:"Anticollision SF ≥ 1.5 vs all offsets", state:"warn" },
+    { id:"ER-03", area:"Casing",    rule:"Burst SF ≥ 1.1 (worst-case gas kick)", state:"pass" },
+    { id:"ER-04", area:"Casing",    rule:"Collapse SF ≥ 1.0 (full evacuation)", state:"pass" },
+    { id:"ER-05", area:"Casing",    rule:"Triaxial VME SF ≥ 1.25", state:"pass" },
+    { id:"ER-06", area:"Cement",    rule:"TOC ≥ 500 ft above shoe of previous casing", state:"pass" },
+    { id:"ER-07", area:"Wellhead",  rule:"Rated pressure ≥ formation shut-in pressure + margin", state:"pass" },
+  ];
+  return (
+    <Modal title="Engineering Check Rules" onClose={onClose}>
+      <p className="text-[11px] text-muted-foreground mb-3">
+        Advisory engineering checks applied automatically to imported trajectory and casing designs. Failures are flagged for review — final acceptance rests with Engineering.
+      </p>
+      <table className="w-full text-xs">
+        <thead className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <tr>{["ID","Area","Rule","State"].map(h=><th key={h} className="text-left py-1.5 pr-2">{h}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rules.map(r=>(
+            <tr key={r.id}>
+              <td className="py-2 pr-2 font-mono text-primary">{r.id}</td>
+              <td className="py-2 pr-2">{r.area}</td>
+              <td className="py-2 pr-2">{r.rule}</td>
+              <td className="py-2 pr-2"><StatusTag tone={r.state==="pass"?"green":r.state==="warn"?"orange":"red"}>{r.state}</StatusTag></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Modal>
+  );
+}
+
 
 function TreeView({
   nodes, selectedId, expanded, onSelect, onToggle, depth = 0,
