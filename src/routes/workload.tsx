@@ -124,8 +124,11 @@ function WorkloadPage() {
             >
               {projects.map(p => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
             </select>
-            <button className="h-9 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 hover:bg-secondary">
-              <Download className="h-3.5 w-3.5" /> Download DSP
+            <button onClick={() => setFinalDspOpen(true)} className="h-9 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 hover:bg-secondary">
+              <Eye className="h-3.5 w-3.5" /> View Final DSP
+            </button>
+            <button onClick={() => setPresentationOpen(true)} className="h-9 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 hover:bg-secondary">
+              <Presentation className="h-3.5 w-3.5" /> View &amp; Edit Presentation
             </button>
             <button className="h-9 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1.5">
               <Send className="h-3.5 w-3.5" /> Send for Review
@@ -184,30 +187,44 @@ function WorkloadPage() {
         <div className="flex gap-1">
           <button onClick={() => setTab("activities")} className={`px-3 py-2 rounded-md border ${tab === "activities" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>Activity Tracker</button>
           <button onClick={() => setTab("dsp")} className={`px-3 py-2 rounded-md border ${tab === "dsp" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>DSP</button>
+          <button onClick={() => setTab("meetings")} className={`px-3 py-2 rounded-md border flex items-center gap-1.5 ${tab === "meetings" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>
+            <CalendarDays className="h-3.5 w-3.5" /> Meetings
+            <span className={`h-1.5 w-1.5 rounded-full ${meetingsComplete ? "bg-[color:var(--status-green)]" : "bg-[color:var(--status-orange)]"}`} />
+          </button>
         </div>
         <div className="flex items-center gap-2 pl-3 border-l border-border">
           <span className="text-muted-foreground text-[11px]">Status</span>
           <StatusTag tone={statusTone[workflowStatus]}>{workflowStatus}</StatusTag>
           <select
             value={workflowStatus}
-            onChange={e => setWorkflowStatus(e.target.value as WFStatus)}
+            onChange={e => {
+              const next = e.target.value as WFStatus;
+              if (next === "Completed" && !meetingsComplete) { setTab("meetings"); return; }
+              setWorkflowStatus(next);
+            }}
             className="h-7 px-1.5 rounded border border-border bg-input/60 text-[11px]"
           >
             {WORKFLOW_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
+          {!meetingsComplete && (
+            <span className="text-[10px] text-[color:var(--status-orange)] flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" /> Meeting comments &amp; summary required to close the gate
+            </span>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 xl:col-span-9 space-y-4">
-          {tab === "activities" ? (
+          {tab === "activities" && (
             <ActivityTracker
               stage={stage}
               activities={activities}
               setActivities={setActivities}
               openReminder={(a) => setReminderFor({ kind: "activity", id: a.id, label: a.title })}
             />
-          ) : (
+          )}
+          {tab === "dsp" && (
             <DspEditor
               stage={stage}
               sections={dspNodes}
@@ -215,8 +232,11 @@ function WorkloadPage() {
               selectedId={dspSelectedId}
               setSelectedId={setDspSelectedId}
               openReminder={(id, label) => setReminderFor({ kind: "section", id, label })}
+              onOpenTagValues={() => setTagValuesOpen(true)}
+              tagValues={tagValues}
             />
           )}
+          {tab === "meetings" && <MeetingsPanel meetings={meetings} setMeetings={setMeetings} stage={stage} />}
         </div>
 
         <div className="col-span-12 xl:col-span-3 space-y-4">
@@ -230,6 +250,9 @@ function WorkloadPage() {
       {reminderFor && <ReminderModal target={reminderFor} onClose={() => setReminderFor(null)} />}
       {commentsModal && <AllCommentsModal onClose={() => setCommentsModal(false)} />}
       {historyModal && <HistoryModal onClose={() => setHistoryModal(false)} />}
+      {finalDspOpen && <FinalDspModal stage={stage} version={version} project={`${project.code} — ${project.name}`} sections={dspNodes} tagValues={tagValues} onClose={() => setFinalDspOpen(false)} />}
+      {presentationOpen && <PresentationModal stage={stage} sections={dspNodes} onClose={() => setPresentationOpen(false)} />}
+      {tagValuesOpen && <TagValuesModal values={tagValues} setValues={setTagValues} project={project.name} onClose={() => setTagValuesOpen(false)} />}
 
       <div className="mt-4 text-[10px] text-muted-foreground">
         Project: <span className="text-foreground/70">{project.code} — {project.name}</span>
