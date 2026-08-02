@@ -10,6 +10,8 @@ import {
   gateStepStatuses,
   validationRules,
   allTeams,
+  appUsers,
+  autoTextTags,
   changeLog,
   type WorkActivity,
 } from "@/lib/mock";
@@ -18,7 +20,6 @@ import {
   Bell,
   UserPlus,
   Plus,
-  Download,
   Send,
   ShieldAlert,
   ChevronRight,
@@ -35,6 +36,15 @@ import {
   RefreshCw,
   Folder,
   ChevronsRight,
+  Eye,
+  Presentation,
+  Copy,
+  Paperclip,
+  MessageSquare,
+  AlertTriangle,
+  Tag,
+  CalendarDays,
+  Check,
 } from "lucide-react";
 
 type Stage = "SG1" | "SG2" | "SG3.1" | "SG3.2";
