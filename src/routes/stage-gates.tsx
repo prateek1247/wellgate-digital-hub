@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel, StatusDot, StatusTag } from "@/components/shell";
-import { dspSections, dsp31Design, projects } from "@/lib/mock";
+import { dspSections, dsp31Design, projects, workActivitiesByStage } from "@/lib/mock";
 
 const stages = [
   { id: "1.0", name: "SG1.0 Identification" },
@@ -57,12 +57,18 @@ function StageGates() {
             <div className="text-sm font-semibold">Required DSP Sections</div>
             <StatusTag tone="blue">{meta.sections.length} sections</StatusTag>
           </div>
+          <SectionProgress total={meta.sections.length} />
           <div className="grid grid-cols-2 gap-2">
             {meta.sections.map((s,i)=>(
-              <div key={s} className="flex items-center gap-2 text-xs px-3 py-2 rounded border border-border bg-secondary/20">
+              <Link
+                key={s}
+                to="/workload"
+                title="Open in Workload"
+                className="flex items-center gap-2 text-xs px-3 py-2 rounded border border-border bg-secondary/20 hover:border-primary/40 hover:bg-primary/5 transition"
+              >
                 <StatusDot status={i%4===0?"completed":i%4===1?"in-progress":i%4===2?"not-started":"overdue"}/>
                 <span className="truncate">{s}</span>
-              </div>
+              </Link>
             ))}
           </div>
 
