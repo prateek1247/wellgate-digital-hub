@@ -77,22 +77,29 @@ function WorkloadPage() {
   const [reminderFor, setReminderFor] = useState<{ kind: "activity" | "section"; id: string; label: string } | null>(null);
   const [commentsModal, setCommentsModal] = useState(false);
   const [historyModal, setHistoryModal] = useState(false);
+  const [finalDspOpen, setFinalDspOpen] = useState(false);
+  const [presentationOpen, setPresentationOpen] = useState(false);
+  const [tagValuesOpen, setTagValuesOpen] = useState(false);
+  const [tagValues, setTagValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(autoTextTags.map(t => [t.tag, t.sample])));
+  const [meetings, setMeetings] = useState<Meeting[]>(initialMeetings);
 
-  const WORKFLOW_STATUSES = ["Not Started","In Progress","Submitted to Planning","CPA Review","Corrections","Pending Gate Keeper Review","Completed"] as const;
+  const WORKFLOW_STATUSES = ["Not Started","In Progress","Submitted to Planning","CPA Review","Clarifications","Pending Gate Keeper Review","Completed"] as const;
   type WFStatus = typeof WORKFLOW_STATUSES[number];
   const [workflowStatus, setWorkflowStatus] = useState<WFStatus>("In Progress");
   const statusTone: Record<WFStatus, "grey"|"orange"|"blue"|"yellow"|"green"> = {
     "Not Started":"grey","In Progress":"orange","Submitted to Planning":"blue",
-    "CPA Review":"blue","Corrections":"yellow","Pending Gate Keeper Review":"yellow","Completed":"green"
+    "CPA Review":"blue","Clarifications":"yellow","Pending Gate Keeper Review":"yellow","Completed":"green"
   };
+  const meetingsComplete = meetings.length > 0 && meetings.every(m => m.summary.trim() !== "" && m.comments.trim() !== "");
 
   // Lifted DSP editor state so CPA comments can deep-link to a section.
   const dspKey = stageToDsp[stage];
   const dspMeta = dspSections[dspKey];
-  const [dspNodes, setDspNodes] = useState<DspNode[]>(() => dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s })));
+  const [dspNodes, setDspNodes] = useState<DspNode[]>(() => dspMeta.sections.map((s, i) => seedNode(`s-${i}`, s, i)));
   const [dspSelectedId, setDspSelectedId] = useState<string>("s-0");
   useEffect(() => {
-    const next = dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s }));
+    const next = dspMeta.sections.map((s, i) => seedNode(`s-${i}`, s, i));
     setDspNodes(next);
     setDspSelectedId(next[0]?.id ?? "");
   }, [dspMeta]);
