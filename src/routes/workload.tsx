@@ -978,7 +978,15 @@ function TreeView({
                 {expanded[n.id] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               </button>
             ) : <span className="w-3" />}
-            <span className="truncate">{n.title}</span>
+            <span className={`h-2 w-2 rounded-full shrink-0 ${n.status === "completed" ? "bg-[color:var(--status-green)]" : n.status === "in-progress" ? "bg-[color:var(--status-orange)]" : "bg-[color:var(--status-grey)]"}`} />
+            <span className="truncate flex-1">{n.title}</span>
+            {isOverdue(n) && <AlertTriangle className="h-3 w-3 text-[color:var(--status-red)] shrink-0" />}
+            {!!n.comments && (
+              <span className="shrink-0 inline-flex items-center gap-0.5 text-[9px] px-1 rounded-full border border-border text-muted-foreground">
+                <MessageSquare className="h-2.5 w-2.5" />{n.comments}
+              </span>
+            )}
+            {!!n.attachments?.length && <Paperclip className="h-3 w-3 text-muted-foreground shrink-0" />}
           </div>
           {n.children && expanded[n.id] && (
             <TreeView nodes={n.children} selectedId={selectedId} expanded={expanded} onSelect={onSelect} onToggle={onToggle} depth={depth + 1} />
