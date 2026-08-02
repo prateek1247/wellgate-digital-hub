@@ -477,6 +477,7 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
           <div className="flex gap-1 mb-2 px-1">
             <button onClick={addSection} className="text-[10px] px-2 py-1 rounded border border-border hover:bg-secondary flex items-center gap-1"><Plus className="h-3 w-3" />Section</button>
             <button onClick={() => addSubsection(selectedId.split("-c-")[0])} className="text-[10px] px-2 py-1 rounded border border-border hover:bg-secondary flex items-center gap-1"><Plus className="h-3 w-3" />Subsection</button>
+            <button onClick={onOpenTagValues} className="text-[10px] px-2 py-1 rounded border border-primary/40 text-primary hover:bg-primary/10 flex items-center gap-1"><Tag className="h-3 w-3" />Tag Values</button>
           </div>
           <TreeView
             nodes={sections}
@@ -497,31 +498,55 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
                     value={selected.title}
                     onChange={e => updateNode(selected.id, { title: e.target.value })}
                   />
-                  <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1"><Info className="h-3 w-3" /> Section info</span>
+                    <StatusTag tone={selected.status === "completed" ? "green" : selected.status === "in-progress" ? "orange" : "grey"}>
+                      {(selected.status ?? "not-started").replace("-", " ")}
+                    </StatusTag>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border text-[10px]">
+                      <MessageSquare className="h-3 w-3" /> {selected.comments ?? 0} comments
+                    </span>
+                    {isOverdue(selected) && (
+                      <StatusTag tone="red"><AlertTriangle className="h-3 w-3" /> Overdue</StatusTag>
+                    )}
                   </div>
                 </div>
-                <button
-                  onClick={() => openReminder(selected.id, selected.title)}
-                  className="h-8 px-3 rounded border border-border text-[11px] flex items-center gap-1.5 hover:bg-secondary"
-                >
-                  <Bell className="h-3.5 w-3.5" /> Reminder
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    disabled={!prevStage[stage]}
+                    onClick={() => { setCopiedFrom(prevStage[stage]); updateNode(selected.id, { status: "in-progress" }); }}
+                    title={prevStage[stage] ? `Copy this section's content from ${prevStage[stage]}` : "No previous stage gate"}
+                    className="h-8 px-3 rounded border border-border text-[11px] flex items-center gap-1.5 hover:bg-secondary disabled:opacity-40"
+                  >
+                    <Copy className="h-3.5 w-3.5" /> Copy from {prevStage[stage] ?? "—"}
+                  </button>
+                  <button
+                    onClick={() => openReminder(selected.id, selected.title)}
+                    className="h-8 px-3 rounded border border-border text-[11px] flex items-center gap-1.5 hover:bg-secondary"
+                  >
+                    <Bell className="h-3.5 w-3.5" /> Reminder
+                  </button>
+                </div>
               </div>
+              {copiedFrom && (
+                <div className="mt-2 text-[10px] text-[color:var(--status-green)] flex items-center gap-1">
+                  <Check className="h-3 w-3" /> Content copied from {copiedFrom} — review and update before submission.
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs">
                 <div>
-                  <div className="text-[10px] text-muted-foreground mb-1">Assign Team</div>
+                  <div className="text-[10px] text-muted-foreground mb-1">Assign User</div>
                   <select
-                    value={selected.assignedTeam ?? ""}
-                    onChange={e => updateNode(selected.id, { assignedTeam: e.target.value || undefined })}
+                    value={selected.assignedUser ?? ""}
+                    onChange={e => updateNode(selected.id, { assignedUser: e.target.value || undefined })}
                     className="h-8 w-full rounded border border-border bg-input/60 text-[11px] px-2"
                   >
                     <option value="">Unassigned</option>
-                    {allTeams.map(t => <option key={t} value={t}>{t}</option>)}
+                    {appUsers.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <button
-                    onClick={() => updateNode(selected.id, { assignedTeam: CURRENT_USER })}
+                    onClick={() => updateNode(selected.id, { assignedUser: CURRENT_USER })}
                     className="mt-1 text-[10px] text-primary hover:underline flex items-center gap-1"
                   >
                     <UserPlus className="h-3 w-3" /> Assign to myself
@@ -531,18 +556,26 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
                   <div className="text-[10px] text-muted-foreground mb-1">Target Date</div>
                   <input
                     type="date"
-                    value={targets[selected.id] ?? ""}
-                    onChange={e => setTargets({ ...targets, [selected.id]: e.target.value })}
+                    value={selected.target ?? ""}
+                    onChange={e => updateNode(selected.id, { target: e.target.value })}
                     className="h-8 w-full rounded border border-border bg-input/60 text-[11px] px-2"
                   />
                 </div>
                 <div>
-                  <div className="text-[10px] text-muted-foreground mb-1">Assigned to</div>
-                  <div className="h-8 flex items-center px-2 rounded border border-border bg-secondary/30 text-[11px]">
-                    {selected.assignedTeam ?? "—"}
-                  </div>
+                  <div className="text-[10px] text-muted-foreground mb-1">Status</div>
+                  <select
+                    value={selected.status ?? "not-started"}
+                    onChange={e => updateNode(selected.id, { status: e.target.value as SectionStatus })}
+                    className="h-8 w-full rounded border border-border bg-input/60 text-[11px] px-2"
+                  >
+                    <option value="not-started">Not started</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
                 </div>
               </div>
+
+              <AttachmentsBlock node={selected} onChange={patch => updateNode(selected.id, patch)} />
 
               <div className="mt-5">
                 <div className="flex items-center justify-between mb-2">
