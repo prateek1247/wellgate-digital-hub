@@ -458,3 +458,82 @@ export const changeLog = [
   { when: "2026-07-12 11:05", who: "H. Al-Rashed (FD)", what: "Concept option excluded", from: "5 options", to: "4 options", section: "DSP 2.0 / Options List", scope: "Cost -0.4%", reason: "Reservoir simulation result" },
   { when: "2026-07-10 08:14", who: "S. Al-Fahad (Planning)", what: "Milestone date moved", from: "2026-08-01", to: "2026-08-14", section: "DSP 2.0 / Milestones", scope: "Schedule +13d", reason: "HSE audit dependency" },
 ];
+
+/* ---------------------------------------------------------------------------
+ * People, auto-text tags and reusable DSP components
+ * ------------------------------------------------------------------------- */
+
+export const appUsers = [
+  "Prateek S. (me)",
+  "A. Al-Sabah — CPA",
+  "M. Al-Otaibi — Drilling",
+  "H. Al-Rashed — FD",
+  "S. Al-Fahad — Planning",
+  "K. Al-Mutairi — IE",
+  "N. Al-Ajmi — HSE",
+  "R. Al-Kandari — Engineering A",
+  "Y. Al-Duwaisan — Engineering B",
+  "F. Al-Enezi — Asset Planning",
+];
+
+export type AutoTag = { tag: string; label: string; source: string; sample: string };
+
+export const autoTextTags: AutoTag[] = [
+  { tag: "{{Project_Name}}", label: "Project name", source: "Project record", sample: "North Kuwait Drilling Package" },
+  { tag: "{{Project_Code}}", label: "Project code", source: "Project record", sample: "NKDP" },
+  { tag: "{{Profile_1}}", label: "Profile 1", source: "Well profiles", sample: "NK-224 — Horizontal producer" },
+  { tag: "{{Profile_2}}", label: "Profile 2", source: "Well profiles", sample: "NK-225 — Deviated injector" },
+  { tag: "{{Number_Of_Wells}}", label: "Number of wells", source: "Scope", sample: "24" },
+  { tag: "{{Total_Cost}}", label: "Total cost (000 KD)", source: "Cost estimate", sample: "164,325" },
+  { tag: "{{Drilling_Cost}}", label: "Drilling cost (000 KD)", source: "Cost estimate", sample: "156,330" },
+  { tag: "{{Completion_Cost}}", label: "Completion cost (000 KD)", source: "Cost estimate", sample: "6,045" },
+  { tag: "{{Flowline_Cost}}", label: "Flowline cost (000 KD)", source: "Cost estimate", sample: "1,950" },
+  { tag: "{{SG1_Date}}", label: "SG1.0 completion date", source: "Schedule", sample: "Aug 2023" },
+  { tag: "{{SG2_Date}}", label: "SG2.0 completion date", source: "Schedule", sample: "Nov 2024" },
+  { tag: "{{SG31_Date}}", label: "SG3.1 completion date", source: "Schedule", sample: "Feb 2025" },
+  { tag: "{{SG32_Date}}", label: "SG3.2 completion date", source: "Schedule", sample: "Jun 2026" },
+  { tag: "{{Field}}", label: "Field / asset", source: "Project record", sample: "North Kuwait / Raudhatain" },
+  { tag: "{{Directorate}}", label: "Directorate", source: "Project record", sample: "Drilling & Technology" },
+];
+
+export type ComponentKind = "table" | "charter" | "longlead" | "chart";
+export type ComponentTemplate = {
+  id: string;
+  name: string;
+  kind: ComponentKind;
+  description: string;
+  columns?: string[];
+  usedIn: string[];
+};
+
+export const componentTemplates: ComponentTemplate[] = [
+  {
+    id: "cmp-charter", name: "Project Charter", kind: "charter",
+    description: "KOC project charter layout — program title, classification, schedule, cost breakdown and stage completion dates.",
+    usedIn: ["DSP 1.0 · Established Project Charter", "DSP 2.0 · Finalize Project Charter"],
+  },
+  {
+    id: "cmp-longlead", name: "Long Lead Items Table", kind: "longlead",
+    description: "Long lead item register with lead time, PR/PO status and required-on-site dates.",
+    columns: ["Item", "Qty", "Lead Time", "PR/PO", "Required on site", "Status"],
+    usedIn: ["DSP 2.0 · Long Lead Items", "DSP 3.2 · Long Lead Items Status"],
+  },
+  {
+    id: "cmp-cost", name: "Cost Breakdown Table", kind: "table",
+    description: "Drilling / flowline / studies cost split with total row.",
+    columns: ["Category", "Cost (000 KD)", "Basis"],
+    usedIn: ["DSP 1.0 · Total Capital Cost Estimate"],
+  },
+  {
+    id: "cmp-schedule", name: "Project Schedule Table", kind: "table",
+    description: "Project stage vs completion date table used in the charter and gate packs.",
+    columns: ["Project Stage", "Completion Date"],
+    usedIn: ["DSP 1.0 · Project Milestone Schedule"],
+  },
+  {
+    id: "cmp-risk", name: "Risk Register Table", kind: "table",
+    description: "Risk, likelihood, impact, mitigation and owner.",
+    columns: ["Risk", "Likelihood", "Impact", "Mitigation", "Owner"],
+    usedIn: ["DSP 3.1 · Risk Management Plan"],
+  },
+];
