@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
-import { allTeams, projects } from "@/lib/mock";
-import { FilePlus, Edit3, Check, Plus, X, Copy, FileText, Image as ImageIcon, Table as TableIcon, Trash2, Filter } from "lucide-react";
+import { allTeams, projects, autoTextTags, componentTemplates, type ComponentTemplate, type AutoTag } from "@/lib/mock";
+import { FilePlus, Edit3, Check, Plus, X, Copy, FileText, Image as ImageIcon, Table as TableIcon, Trash2, Filter, Tag, LayoutTemplate } from "lucide-react";
 
 export const Route = createFileRoute("/templates")({
   head: () => ({ meta: [{ title: "Templates & Rules — WDPGS" }, { name: "description", content: "Manage DSP, activity, report and validation templates." }] }),
@@ -104,7 +104,7 @@ const initialValidationTemplates: ValidationTemplate[] = [
 ];
 
 function Templates(){
-  const [tab, setTab] = useState<"assignments"|"projectTemplates"|"dsp"|"activities"|"rules"|"reports">("assignments");
+  const [tab, setTab] = useState<"assignments"|"projectTemplates"|"dsp"|"activities"|"rules"|"reports"|"components"|"tags">("assignments");
   const [projectTemplates, setProjectTemplates] = useState<ProjectTemplate[]>(initialProjectTemplates);
   const [dspTemplates, setDspTemplates] = useState(initialDspTemplates);
   const [reportTemplates, setReportTemplates] = useState(initialReportTemplates);
@@ -151,6 +151,8 @@ function Templates(){
           ["activities","Activity Templates"],
           ["rules","Validation Rules"],
           ["reports","Report Templates"],
+          ["components","Components"],
+          ["tags","Auto Text Tags"],
         ].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k as any)} className={`px-3 py-2 rounded-md border ${tab===k?"bg-primary/15 border-primary/30 text-primary":"border-border text-muted-foreground hover:bg-secondary"}`}>{l}</button>
         ))}
@@ -253,6 +255,9 @@ function Templates(){
           dspTemplates={dspTemplates}
         />
       )}
+
+      {tab==="components" && <ComponentsTab />}
+      {tab==="tags" && <AutoTagsTab />}
 
       {editAssignment && <EditAssignmentModal code={editAssignment} projectTemplates={projectTemplates} onClose={()=>setEditAssignment(null)} />}
       {editProjectTemplate && (
