@@ -16,6 +16,8 @@ import {
   HelpCircle,
   Globe,
   Wrench,
+  PenTool,
+  Images,
 } from "lucide-react";
 
 const nav = [
@@ -23,9 +25,11 @@ const nav = [
   { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/workload", label: "Workload", icon: FileStack },
   { to: "/well-designs", label: "Automated Well Designs", icon: Wrench },
+  { to: "/well-schematics", label: "Create Well Schematics", icon: PenTool },
+  { to: "/well-montage", label: "Well Montage", icon: Images },
   { to: "/templates", label: "Templates and Rules", icon: Layers },
   { to: "/activities", label: "Activity Library", icon: Library },
-  { to: "/stage-gates", label: "Governance", icon: GitBranch },
+  { to: "/stage-gates", label: "Stage Gate Tracker", icon: GitBranch },
   { to: "/admin", label: "User Access", icon: UserCog },
   { to: "/approvals", label: "Approvals", icon: ClipboardCheck },
   { to: "/cpa", label: "CPA Governance", icon: ShieldCheck },
