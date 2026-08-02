@@ -70,7 +70,7 @@ function WorkloadPage() {
   const project = projects.find(p => p.code === projectCode) ?? projects[0];
   const [stage, setStage] = useState<Stage>("SG3.1");
   const [version, setVersion] = useState(stageVersions[stage][0]);
-  const [tab, setTab] = useState<"activities" | "dsp">("activities");
+  const [tab, setTab] = useState<"activities" | "dsp" | "meetings">("activities");
   const [activities, setActivities] = useState<WorkActivity[]>(workActivitiesByStage[stage]);
   useEffect(() => { setActivities(workActivitiesByStage[stage]); }, [stage]);
 
