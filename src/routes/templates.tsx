@@ -834,3 +834,248 @@ function ValidationEditorModal({ template, onSave, onClose }: { template: Valida
     </Modal>
   );
 }
+/* ------------------------------ Components library -------------------------- */
+
+function ComponentsTab() {
+  const [items, setItems] = useState<ComponentTemplate[]>(componentTemplates);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  const duplicate = (id: string) => {
+    const src = items.find(i => i.id === id)!;
+    setItems([...items, { ...src, id: `${id}-copy-${Date.now()}`, name: `${src.name} (Copy)` }]);
+  };
+  const create = (kind: ComponentTemplate["kind"]) => {
+    const id = `cmp-${Date.now()}`;
+    setItems([...items, {
+      id, kind,
+      name: kind === "charter" ? "New Project Charter" : kind === "longlead" ? "New Long Lead Items Table" : kind === "chart" ? "New Chart" : "New Table",
+      description: "Describe what this component captures.",
+      columns: kind === "charter" ? undefined : ["Column A", "Column B"],
+      usedIn: [],
+    }]);
+    setCreating(false);
+    setEditing(id);
+  };
+  const update = (next: ComponentTemplate) => setItems(items.map(i => i.id === next.id ? next : i));
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div className="text-xs text-muted-foreground">
+          Reusable content components — tables, project charter layouts, long lead item registers and charts — that can be dropped into any DSP section or report template.
+        </div>
+        <button onClick={() => setCreating(true)} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1">
+          <Plus className="h-3.5 w-3.5" />Create Component
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {items.map(c => (
+          <Panel key={c.id} className="p-5 flex flex-col">
+            <div className="flex items-start justify-between gap-2">
+              <div className="text-base font-semibold flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4 text-primary" />{c.name}
+              </div>
+              <StatusTag tone={c.kind === "charter" ? "yellow" : c.kind === "longlead" ? "orange" : "blue"}>{c.kind}</StatusTag>
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-2 flex-1">{c.description}</div>
+            {c.columns && <div className="mt-2 text-[10px] text-muted-foreground">Columns: {c.columns.join(" · ")}</div>}
+            {c.usedIn.length > 0 && <div className="mt-1 text-[10px] text-muted-foreground">Used in: {c.usedIn.join("; ")}</div>}
+            <div className="mt-4 flex gap-2 flex-wrap">
+              <button onClick={() => setEditing(c.id)} className="h-8 px-3 rounded-md border border-border text-xs flex items-center gap-1.5"><Edit3 className="h-3.5 w-3.5" />Edit</button>
+              <button onClick={() => duplicate(c.id)} className="h-8 px-3 rounded-md border border-border text-xs flex items-center gap-1.5"><Copy className="h-3.5 w-3.5" />Duplicate</button>
+              <button onClick={() => setItems(items.filter(i => i.id !== c.id))} className="h-8 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 text-muted-foreground"><Trash2 className="h-3.5 w-3.5" />Delete</button>
+            </div>
+          </Panel>
+        ))}
+      </div>
+
+      {creating && (
+        <Modal title="Create Component" onClose={() => setCreating(false)} size="max-w-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {([
+              ["table", "Table", "Generic table with editable columns."],
+              ["charter", "Project Charter", "KOC charter layout with cost breakdown and stage schedule."],
+              ["longlead", "Long Lead Items Table", "Long lead register with lead times and PR/PO status."],
+              ["chart", "Chart", "Simple bar/line chart placeholder driven by a table."],
+            ] as const).map(([kind, label, desc]) => (
+              <button key={kind} onClick={() => create(kind)} className="text-left p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5">
+                <div className="text-sm font-semibold">{label}</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{desc}</div>
+              </button>
+            ))}
+          </div>
+        </Modal>
+      )}
+
+      {editing && (
+        <ComponentEditorModal
+          component={items.find(i => i.id === editing)!}
+          onSave={c => { update(c); setEditing(null); }}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </>
+  );
+}
+
+function ComponentEditorModal({ component, onSave, onClose }: { component: ComponentTemplate; onSave: (c: ComponentTemplate) => void; onClose: () => void }) {
+  const [draft, setDraft] = useState<ComponentTemplate>(component);
+  const cols = draft.columns ?? [];
+  return (
+    <Modal title={`Edit Component — ${draft.name}`} onClose={onClose} size="max-w-4xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+        <label className="text-xs">
+          <div className="text-muted-foreground mb-1">Name</div>
+          <input value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} className="h-9 w-full rounded border border-border bg-input/60 px-2 text-xs" />
+        </label>
+        <label className="text-xs">
+          <div className="text-muted-foreground mb-1">Description</div>
+          <input value={draft.description} onChange={e => setDraft({ ...draft, description: e.target.value })} className="h-9 w-full rounded border border-border bg-input/60 px-2 text-xs" />
+        </label>
+      </div>
+
+      {draft.kind === "charter" ? (
+        <ProjectCharterPreview />
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Columns</div>
+            <button onClick={() => setDraft({ ...draft, columns: [...cols, `Column ${cols.length + 1}`] })} className="h-7 px-2 rounded border border-border text-[11px] flex items-center gap-1"><Plus className="h-3 w-3" />Add column</button>
+          </div>
+          <div className="space-y-1.5 mb-4">
+            {cols.map((c, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input value={c} onChange={e => setDraft({ ...draft, columns: cols.map((x, j) => j === i ? e.target.value : x) })} className="h-8 flex-1 rounded border border-border bg-input/60 px-2 text-xs" />
+                <button onClick={() => setDraft({ ...draft, columns: cols.filter((_, j) => j !== i) })} className="h-8 w-8 grid place-items-center rounded border border-border text-muted-foreground"><Trash2 className="h-3.5 w-3.5" /></button>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Preview</div>
+          <table className="w-full text-[11px] border border-border rounded">
+            <thead className="bg-secondary/30 text-muted-foreground"><tr>{cols.map(c => <th key={c} className="text-left px-2 py-1.5">{c}</th>)}</tr></thead>
+            <tbody>{[0, 1].map(r => <tr key={r} className="border-t border-border">{cols.map(c => <td key={c} className="px-2 py-1.5 text-muted-foreground">…</td>)}</tr>)}</tbody>
+          </table>
+        </>
+      )}
+
+      <div className="mt-3 text-[10px] text-muted-foreground italic">
+        Tip: use auto text tags such as <span className="font-mono text-primary">{"{{Project_Name}}"}</span> or <span className="font-mono text-primary">{"{{Total_Cost}}"}</span> inside cells — values resolve per project.
+      </div>
+
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onClose} className="h-9 px-3 rounded border border-border text-xs">Cancel</button>
+        <button onClick={() => onSave(draft)} className="h-9 px-3 rounded bg-primary text-primary-foreground text-xs flex items-center gap-1.5"><Check className="h-3.5 w-3.5" />Save</button>
+      </div>
+    </Modal>
+  );
+}
+
+function ProjectCharterPreview() {
+  const cell = "border border-border px-2 py-1.5 align-top";
+  return (
+    <div className="overflow-x-auto">
+      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Project Charter layout</div>
+      <table className="w-full text-[11px] border-collapse">
+        <tbody>
+          <tr><td colSpan={4} className="bg-primary/20 text-center font-semibold py-2 border border-border">Project Charter</td></tr>
+          <tr>
+            <td className={`${cell} bg-secondary/40 font-medium w-[16%]`}>Program title</td>
+            <td className={cell}>{"{{Project_Name}}"}</td>
+            <td className={`${cell} bg-secondary/40 font-medium w-[16%]`}>Start / End Date</td>
+            <td className={cell}>{"{{SG1_Date}}"} / {"{{SG32_Date}}"}</td>
+          </tr>
+          <tr>
+            <td className={`${cell} bg-secondary/40 font-medium`}>Classification</td>
+            <td className={cell}>Strategic</td>
+            <td className={`${cell} bg-secondary/40 font-medium`}>ECAP alignment</td>
+            <td className={cell}>Yes</td>
+          </tr>
+          <tr><td colSpan={4} className="bg-primary/15 text-center font-semibold py-1.5 border border-border">{"{{Project_Code}}"} — {"{{Number_Of_Wells}}"} Wells</td></tr>
+          <tr>
+            <td className={`${cell} bg-secondary/40 font-medium`}>Directorate</td>
+            <td className={cell}>{"{{Directorate}}"}</td>
+            <td className={`${cell} bg-secondary/40 font-medium`}>Field</td>
+            <td className={cell}>{"{{Field}}"}</td>
+          </tr>
+          <tr>
+            <td className={`${cell} font-medium`} rowSpan={2}>
+              Project Scope / Objectives / Risks<div className="text-muted-foreground font-normal mt-1">Free text with tags: {"{{Profile_1}}"}, {"{{Profile_2}}"}</div>
+            </td>
+            <td className={cell}>
+              <div className="font-medium mb-1">Cost Breakdown (000 KD)</div>
+              <div>Drilling · {"{{Drilling_Cost}}"}</div>
+              <div>Completion · {"{{Completion_Cost}}"}</div>
+              <div>F/L · {"{{Flowline_Cost}}"}</div>
+              <div className="font-medium">Total · {"{{Total_Cost}}"}</div>
+            </td>
+            <td className={cell} colSpan={2}>
+              <div className="font-medium mb-1">Project Schedule</div>
+              <div>SG 1.0 Assess · {"{{SG1_Date}}"}</div>
+              <div>SG 2.0 Select · {"{{SG2_Date}}"}</div>
+              <div>SG 3.1 Define/Design · {"{{SG31_Date}}"}</div>
+              <div>SG 3.2 Define/Procure · {"{{SG32_Date}}"}</div>
+            </td>
+          </tr>
+          <tr><td className={cell} colSpan={3}>Signature block · KOC #</td></tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ------------------------------ Auto text tags ------------------------------ */
+
+function AutoTagsTab() {
+  const [tags, setTags] = useState<AutoTag[]>(autoTextTags);
+  const [q, setQ] = useState("");
+  const filtered = tags.filter(t => (t.tag + t.label + t.source).toLowerCase().includes(q.toLowerCase()));
+  const update = (i: number, patch: Partial<AutoTag>) => setTags(tags.map((t, j) => j === i ? { ...t, ...patch } : t));
+  const add = () => setTags([...tags, { tag: "{{New_Tag}}", label: "New tag", source: "Manual", sample: "" }]);
+
+  return (
+    <Panel className="p-0 overflow-hidden">
+      <div className="px-5 py-3 border-b border-border flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <div className="text-sm font-semibold flex items-center gap-2"><Tag className="h-4 w-4 text-primary" />Auto Text Tags</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">Tags resolve automatically per project wherever they appear in DSP content, components or reports.</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search tags…" className="h-8 w-48 rounded border border-border bg-input/60 px-2 text-xs" />
+          <button onClick={add} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1"><Plus className="h-3.5 w-3.5" />Create Tag</button>
+        </div>
+      </div>
+      <table className="w-full text-xs">
+        <thead className="bg-secondary/40 text-[10px] text-muted-foreground uppercase tracking-wider">
+          <tr>{["Tag", "Label", "Data source", "Sample value", ""].map(h => <th key={h} className="text-left px-4 py-2.5 font-medium">{h}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {filtered.map((t) => {
+            const i = tags.indexOf(t);
+            return (
+              <tr key={t.tag + i} className="hover:bg-secondary/20">
+                <td className="px-4 py-2">
+                  <input value={t.tag} onChange={e => update(i, { tag: e.target.value })} className="h-7 w-full rounded border border-border bg-input/60 px-1.5 font-mono text-[11px] text-primary" />
+                </td>
+                <td className="px-4 py-2"><input value={t.label} onChange={e => update(i, { label: e.target.value })} className="h-7 w-full rounded border border-border bg-input/60 px-1.5 text-[11px]" /></td>
+                <td className="px-4 py-2">
+                  <select value={t.source} onChange={e => update(i, { source: e.target.value })} className="h-7 w-full rounded border border-border bg-input/60 px-1 text-[11px]">
+                    {["Project record", "Scope", "Cost estimate", "Schedule", "Well profiles", "Manual"].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </td>
+                <td className="px-4 py-2 text-muted-foreground">{t.sample || "—"}</td>
+                <td className="px-4 py-2 text-right">
+                  <button onClick={() => setTags(tags.filter((_, j) => j !== i))} className="text-muted-foreground text-[11px] inline-flex items-center gap-1"><Trash2 className="h-3 w-3" />Delete</button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="px-5 py-3 text-[10px] text-muted-foreground border-t border-border">
+        Assign per-project values in Workload → DSP → Tag Values.
+      </div>
+    </Panel>
+  );
+}
