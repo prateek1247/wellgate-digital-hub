@@ -386,30 +386,60 @@ function ActivityTracker({
 
 /* ------------------------------ DSP editor ---------------------------------- */
 
-type DspNode = { id: string; title: string; children?: DspNode[]; assignedTeam?: string };
+type SectionStatus = "not-started" | "in-progress" | "completed";
+type Attachment = { id: string; name: string; showInFinal: boolean };
+type DspNode = {
+  id: string;
+  title: string;
+  children?: DspNode[];
+  assignedUser?: string;
+  status?: SectionStatus;
+  target?: string;
+  comments?: number;
+  attachments?: Attachment[];
+};
 
-function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder }: {
+function seedNode(id: string, title: string, i: number): DspNode {
+  const statuses: SectionStatus[] = ["completed", "in-progress", "not-started"];
+  const targets = ["2026-07-10", "2026-08-15", "2026-09-30", "2026-10-20"];
+  return {
+    id,
+    title,
+    status: statuses[i % 3],
+    target: targets[i % 4],
+    comments: i % 5 === 0 ? 3 : i % 3 === 0 ? 1 : 0,
+    attachments: i % 4 === 0 ? [{ id: `${id}-a1`, name: "supporting-note.pdf", showInFinal: true }] : [],
+  };
+}
+
+const TODAY = new Date().toISOString().slice(0, 10);
+const isOverdue = (n: DspNode) => !!n.target && n.target < TODAY && n.status !== "completed";
+const prevStage: Record<Stage, Stage | null> = { SG1: null, SG2: "SG1", "SG3.1": "SG2", "SG3.2": "SG3.1" };
+
+function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder, onOpenTagValues, tagValues }: {
   stage: Stage;
   sections: DspNode[];
   setSections: (s: DspNode[]) => void;
   selectedId: string;
   setSelectedId: (id: string) => void;
   openReminder: (id: string, label: string) => void;
+  onOpenTagValues: () => void;
+  tagValues: Record<string, string>;
 }) {
   const dspKey = stageToDsp[stage];
   const meta = dspSections[dspKey];
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [blocks, setBlocks] = useState<Record<string, ContentBlock[]>>({});
-  const [targets, setTargets] = useState<Record<string, string>>({});
   const [edmOpen, setEdmOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [validationTick, setValidationTick] = useState(0);
+  const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
 
   const selected = findNode(sections, selectedId);
 
   const addSection = () => {
     const id = `s-new-${sections.length}`;
-    setSections([...sections, { id, title: "New section" }]);
+    setSections([...sections, { id, title: "New section", status: "not-started", comments: 0, attachments: [] }]);
     setSelectedId(id);
   };
   const addSubsection = (parentId: string) => {
