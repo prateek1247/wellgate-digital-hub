@@ -1308,3 +1308,242 @@ function HistoryModal({ onClose }: { onClose: () => void }) {
     </Modal>
   );
 }
+
+/* ------------------------------ Attachments --------------------------------- */
+
+function AttachmentsBlock({ node, onChange }: { node: DspNode; onChange: (patch: Partial<DspNode>) => void }) {
+  const list = node.attachments ?? [];
+  const add = () => onChange({ attachments: [...list, { id: `${node.id}-a${list.length + 1}`, name: `attachment-${list.length + 1}.pdf`, showInFinal: true }] });
+  const update = (id: string, patch: Partial<Attachment>) => onChange({ attachments: list.map(a => a.id === id ? { ...a, ...patch } : a) });
+  return (
+    <div className="mt-4 rounded border border-border p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-xs text-muted-foreground flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" />Attachments</div>
+        <button onClick={add} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary"><Plus className="h-3 w-3" />Add attachment</button>
+      </div>
+      {list.length === 0 ? (
+        <div className="text-[11px] text-muted-foreground italic">No attachments. Uploaded files can be shown or hidden in the final DSP.</div>
+      ) : (
+        <div className="space-y-1.5">
+          {list.map(a => (
+            <div key={a.id} className="flex items-center gap-2 text-[11px] border border-border rounded px-2 py-1.5">
+              <Paperclip className="h-3 w-3 text-muted-foreground" />
+              <input value={a.name} onChange={e => update(a.id, { name: e.target.value })} className="flex-1 bg-transparent outline-none" />
+              <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <input type="checkbox" checked={a.showInFinal} onChange={e => update(a.id, { showInFinal: e.target.checked })} className="accent-[color:var(--accent-blue)]" />
+                Show in final DSP
+              </label>
+              <button onClick={() => onChange({ attachments: list.filter(x => x.id !== a.id) })} className="text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------ Meetings ------------------------------------ */
+
+type Meeting = { id: string; title: string; date: string; attendees: string; comments: string; summary: string };
+
+const initialMeetings: Meeting[] = [
+  { id: "m1", title: "Meeting 1 — Kickoff review", date: "2026-06-12", attendees: "IE, FD, Drilling, CPA", comments: "Profiles to be reconciled with AAP before next review.", summary: "Scope confirmed, 24 wells retained." },
+  { id: "m2", title: "Meeting 2 — Assurance walkthrough", date: "2026-07-08", attendees: "CPA, Planning, Engineering A", comments: "", summary: "" },
+  { id: "m3", title: "Meeting 3 — Pre-gate alignment", date: "2026-08-05", attendees: "Gate Keeper, Planning, IE", comments: "", summary: "" },
+];
+
+function MeetingsPanel({ meetings, setMeetings, stage }: { meetings: Meeting[]; setMeetings: (m: Meeting[]) => void; stage: Stage }) {
+  const [openId, setOpenId] = useState(meetings[0]?.id ?? "");
+  const update = (id: string, patch: Partial<Meeting>) => setMeetings(meetings.map(m => m.id === id ? { ...m, ...patch } : m));
+  const add = () => {
+    const id = `m${meetings.length + 1}-${Date.now()}`;
+    setMeetings([...meetings, { id, title: `Meeting ${meetings.length + 1}`, date: "", attendees: "", comments: "", summary: "" }]);
+    setOpenId(id);
+  };
+  const active = meetings.find(m => m.id === openId) ?? meetings[0];
+  const incomplete = meetings.filter(m => !m.comments.trim() || !m.summary.trim()).length;
+
+  return (
+    <Panel className="p-4">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div>
+          <div className="text-sm font-semibold">Meeting Details · {stage}</div>
+          <div className="text-[11px] text-muted-foreground">Meeting comments and summary are mandatory before the stage gate can be closed.</div>
+        </div>
+        <div className="flex items-center gap-2">
+          {incomplete > 0
+            ? <StatusTag tone="orange"><AlertTriangle className="h-3 w-3" />{incomplete} meeting{incomplete === 1 ? "" : "s"} incomplete</StatusTag>
+            : <StatusTag tone="green"><Check className="h-3 w-3" />All meetings recorded</StatusTag>}
+          <button onClick={add} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1.5"><Plus className="h-3.5 w-3.5" />Add Meeting</button>
+        </div>
+      </div>
+
+      <div className="flex gap-1 mb-3 flex-wrap text-xs">
+        {meetings.map(m => {
+          const ok = m.comments.trim() && m.summary.trim();
+          return (
+            <button key={m.id} onClick={() => setOpenId(m.id)} className={`px-3 py-1.5 rounded-md border flex items-center gap-1.5 ${openId === m.id ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>
+              <span className={`h-2 w-2 rounded-full ${ok ? "bg-[color:var(--status-green)]" : "bg-[color:var(--status-orange)]"}`} />
+              {m.title}
+            </button>
+          );
+        })}
+      </div>
+
+      {active && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <label className="text-[10px] text-muted-foreground">Title
+              <input value={active.title} onChange={e => update(active.id, { title: e.target.value })} className="mt-1 h-8 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+            </label>
+            <label className="text-[10px] text-muted-foreground">Date
+              <input type="date" value={active.date} onChange={e => update(active.id, { date: e.target.value })} className="mt-1 h-8 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+            </label>
+            <label className="text-[10px] text-muted-foreground">Attendees
+              <input value={active.attendees} onChange={e => update(active.id, { attendees: e.target.value })} className="mt-1 h-8 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+            </label>
+          </div>
+          <label className="block text-[10px] text-muted-foreground">
+            Meeting comments <span className="text-[color:var(--status-red)]">*</span>
+            <textarea value={active.comments} onChange={e => update(active.id, { comments: e.target.value })}
+              placeholder="Record comments raised during the meeting…"
+              className={`mt-1 w-full min-h-[90px] p-2 rounded border bg-input/60 text-xs ${active.comments.trim() ? "border-border" : "border-[color:var(--status-orange)]/50"}`} />
+          </label>
+          <label className="block text-[10px] text-muted-foreground">
+            Meeting summary <span className="text-[color:var(--status-red)]">*</span>
+            <textarea value={active.summary} onChange={e => update(active.id, { summary: e.target.value })}
+              placeholder="Summarise outcomes, decisions and actions…"
+              className={`mt-1 w-full min-h-[90px] p-2 rounded border bg-input/60 text-xs ${active.summary.trim() ? "border-border" : "border-[color:var(--status-orange)]/50"}`} />
+          </label>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/* ------------------------------ Tag values ---------------------------------- */
+
+function TagValuesModal({ values, setValues, project, onClose }: { values: Record<string, string>; setValues: (v: Record<string, string>) => void; project: string; onClose: () => void }) {
+  return (
+    <Modal title={`Tag Values — ${project}`} onClose={onClose}>
+      <p className="text-[11px] text-muted-foreground mb-3">
+        Assign this project's values to the auto text tags. Tags resolve automatically in DSP content, components and reports.
+      </p>
+      <table className="w-full text-xs">
+        <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <tr>{["Tag", "Label", "Value for this project"].map(h => <th key={h} className="text-left py-1.5 pr-2">{h}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {autoTextTags.map(t => (
+            <tr key={t.tag}>
+              <td className="py-2 pr-2 font-mono text-primary whitespace-nowrap">{t.tag}</td>
+              <td className="py-2 pr-2 text-muted-foreground">{t.label}</td>
+              <td className="py-2 pr-2">
+                <input value={values[t.tag] ?? ""} onChange={e => setValues({ ...values, [t.tag]: e.target.value })}
+                  className="h-7 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 flex justify-end">
+        <button onClick={onClose} className="h-9 px-3 rounded bg-primary text-primary-foreground text-xs">Save values</button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ------------------------------ Final DSP & presentation -------------------- */
+
+function FinalDspModal({ stage, version, project, sections, tagValues, onClose }: {
+  stage: Stage; version: string; project: string; sections: DspNode[]; tagValues: Record<string, string>; onClose: () => void;
+}) {
+  const flat = flatten(sections);
+  const done = flat.filter(s => s.status === "completed").length;
+  return (
+    <Modal title={`Final DSP — ${stage} ${version}`} onClose={onClose}>
+      <div className="rounded-lg border border-border p-5 bg-secondary/10">
+        <div className="text-center border-b border-border pb-3 mb-4">
+          <div className="text-lg font-semibold">{tagValues["{{Project_Name}}"] || project}</div>
+          <div className="text-[11px] text-muted-foreground mt-1">
+            Delivery Support Package · {stage} · {version} · {tagValues["{{Number_Of_Wells}}"] || "—"} wells · Total {tagValues["{{Total_Cost}}"] || "—"} (000 KD)
+          </div>
+          <div className="mt-2"><StatusTag tone="blue">{done} of {flat.length} sections completed</StatusTag></div>
+        </div>
+        <div className="space-y-3">
+          {flat.map((s, i) => (
+            <div key={s.id} className="border-b border-border/60 pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-sm font-medium">{i + 1}. {s.title}</div>
+                <div className="flex items-center gap-1.5">
+                  {isOverdue(s) && <StatusTag tone="red">Overdue</StatusTag>}
+                  <StatusTag tone={s.status === "completed" ? "green" : s.status === "in-progress" ? "orange" : "grey"}>{(s.status ?? "not-started").replace("-", " ")}</StatusTag>
+                </div>
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-1">
+                Owner {s.assignedUser ?? "—"} · Target {s.target || "—"}
+              </div>
+              {(s.attachments ?? []).filter(a => a.showInFinal).length > 0 && (
+                <div className="mt-1 text-[10px] text-muted-foreground flex items-center gap-1 flex-wrap">
+                  <Paperclip className="h-3 w-3" />
+                  {(s.attachments ?? []).filter(a => a.showInFinal).map(a => a.name).join(", ")}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className="mt-3 text-[10px] text-muted-foreground italic">Read-only rendering of the compiled DSP. Hidden attachments are excluded.</p>
+    </Modal>
+  );
+}
+
+function PresentationModal({ stage, sections, onClose }: { stage: Stage; sections: DspNode[]; onClose: () => void }) {
+  const [mode, setMode] = useState<"view" | "edit">("view");
+  const [slides, setSlides] = useState(() => [
+    { id: "sl1", title: `${stage} Stage Gate Review`, body: "Project overview, scope and objectives." },
+    { id: "sl2", title: "Scope & Well Profiles", body: flatten(sections).slice(0, 4).map(s => `• ${s.title}`).join("\n") },
+    { id: "sl3", title: "Cost & Schedule", body: "• Total cost\n• Stage completion dates" },
+    { id: "sl4", title: "Risks & Assurance", body: "• Open CPA comments\n• Validation summary" },
+  ]);
+  const update = (id: string, patch: Partial<{ title: string; body: string }>) => setSlides(slides.map(s => s.id === id ? { ...s, ...patch } : s));
+
+  return (
+    <Modal title={`Presentation — ${stage}`} onClose={onClose}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex gap-1 text-xs">
+          {(["view", "edit"] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)} className={`px-3 py-1.5 rounded border capitalize ${mode === m ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground"}`}>{m}</button>
+          ))}
+        </div>
+        {mode === "edit" && (
+          <button onClick={() => setSlides([...slides, { id: `sl${slides.length + 1}`, title: "New slide", body: "" }])} className="h-8 px-3 rounded border border-border text-xs flex items-center gap-1.5"><Plus className="h-3.5 w-3.5" />Add slide</button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {slides.map((s, i) => (
+          <div key={s.id} className="rounded border border-border overflow-hidden">
+            <div className="px-2 py-1 text-[10px] bg-secondary/40 text-muted-foreground border-b border-border">Slide {i + 1}</div>
+            <div className="p-3 min-h-[130px] bg-secondary/10">
+              {mode === "view" ? (
+                <>
+                  <div className="text-sm font-semibold mb-1.5">{s.title}</div>
+                  <div className="text-[11px] text-muted-foreground whitespace-pre-line">{s.body}</div>
+                </>
+              ) : (
+                <>
+                  <input value={s.title} onChange={e => update(s.id, { title: e.target.value })} className="h-7 w-full rounded border border-border bg-input/60 px-2 text-xs mb-1.5" />
+                  <textarea value={s.body} onChange={e => update(s.id, { body: e.target.value })} className="w-full min-h-[80px] rounded border border-border bg-input/60 p-2 text-[11px]" />
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Modal>
+  );
+}
+
+function flatten(nodes: DspNode[]): DspNode[] {
+  return nodes.flatMap(n => [n, ...(n.children ? flatten(n.children) : [])]);
+}
