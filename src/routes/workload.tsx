@@ -10,6 +10,8 @@ import {
   gateStepStatuses,
   validationRules,
   allTeams,
+  appUsers,
+  autoTextTags,
   changeLog,
   type WorkActivity,
 } from "@/lib/mock";
@@ -18,7 +20,6 @@ import {
   Bell,
   UserPlus,
   Plus,
-  Download,
   Send,
   ShieldAlert,
   ChevronRight,
@@ -35,6 +36,15 @@ import {
   RefreshCw,
   Folder,
   ChevronsRight,
+  Eye,
+  Presentation,
+  Copy,
+  Paperclip,
+  MessageSquare,
+  AlertTriangle,
+  Tag,
+  CalendarDays,
+  Check,
 } from "lucide-react";
 
 type Stage = "SG1" | "SG2" | "SG3.1" | "SG3.2";
@@ -60,29 +70,36 @@ function WorkloadPage() {
   const project = projects.find(p => p.code === projectCode) ?? projects[0];
   const [stage, setStage] = useState<Stage>("SG3.1");
   const [version, setVersion] = useState(stageVersions[stage][0]);
-  const [tab, setTab] = useState<"activities" | "dsp">("activities");
+  const [tab, setTab] = useState<"activities" | "dsp" | "meetings">("activities");
   const [activities, setActivities] = useState<WorkActivity[]>(workActivitiesByStage[stage]);
   useEffect(() => { setActivities(workActivitiesByStage[stage]); }, [stage]);
 
   const [reminderFor, setReminderFor] = useState<{ kind: "activity" | "section"; id: string; label: string } | null>(null);
   const [commentsModal, setCommentsModal] = useState(false);
   const [historyModal, setHistoryModal] = useState(false);
+  const [finalDspOpen, setFinalDspOpen] = useState(false);
+  const [presentationOpen, setPresentationOpen] = useState(false);
+  const [tagValuesOpen, setTagValuesOpen] = useState(false);
+  const [tagValues, setTagValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(autoTextTags.map(t => [t.tag, t.sample])));
+  const [meetings, setMeetings] = useState<Meeting[]>(initialMeetings);
 
-  const WORKFLOW_STATUSES = ["Not Started","In Progress","Submitted to Planning","CPA Review","Corrections","Pending Gate Keeper Review","Completed"] as const;
+  const WORKFLOW_STATUSES = ["Not Started","In Progress","Submitted to Planning","CPA Review","Clarifications","Pending Gate Keeper Review","Completed"] as const;
   type WFStatus = typeof WORKFLOW_STATUSES[number];
   const [workflowStatus, setWorkflowStatus] = useState<WFStatus>("In Progress");
   const statusTone: Record<WFStatus, "grey"|"orange"|"blue"|"yellow"|"green"> = {
     "Not Started":"grey","In Progress":"orange","Submitted to Planning":"blue",
-    "CPA Review":"blue","Corrections":"yellow","Pending Gate Keeper Review":"yellow","Completed":"green"
+    "CPA Review":"blue","Clarifications":"yellow","Pending Gate Keeper Review":"yellow","Completed":"green"
   };
+  const meetingsComplete = meetings.length > 0 && meetings.every(m => m.summary.trim() !== "" && m.comments.trim() !== "");
 
   // Lifted DSP editor state so CPA comments can deep-link to a section.
   const dspKey = stageToDsp[stage];
   const dspMeta = dspSections[dspKey];
-  const [dspNodes, setDspNodes] = useState<DspNode[]>(() => dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s })));
+  const [dspNodes, setDspNodes] = useState<DspNode[]>(() => dspMeta.sections.map((s, i) => seedNode(`s-${i}`, s, i)));
   const [dspSelectedId, setDspSelectedId] = useState<string>("s-0");
   useEffect(() => {
-    const next = dspMeta.sections.map((s, i) => ({ id: `s-${i}`, title: s }));
+    const next = dspMeta.sections.map((s, i) => seedNode(`s-${i}`, s, i));
     setDspNodes(next);
     setDspSelectedId(next[0]?.id ?? "");
   }, [dspMeta]);
@@ -107,8 +124,11 @@ function WorkloadPage() {
             >
               {projects.map(p => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
             </select>
-            <button className="h-9 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 hover:bg-secondary">
-              <Download className="h-3.5 w-3.5" /> Download DSP
+            <button onClick={() => setFinalDspOpen(true)} className="h-9 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 hover:bg-secondary">
+              <Eye className="h-3.5 w-3.5" /> View Final DSP
+            </button>
+            <button onClick={() => setPresentationOpen(true)} className="h-9 px-3 rounded-md border border-border text-xs flex items-center gap-1.5 hover:bg-secondary">
+              <Presentation className="h-3.5 w-3.5" /> View &amp; Edit Presentation
             </button>
             <button className="h-9 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1.5">
               <Send className="h-3.5 w-3.5" /> Send for Review
@@ -167,30 +187,44 @@ function WorkloadPage() {
         <div className="flex gap-1">
           <button onClick={() => setTab("activities")} className={`px-3 py-2 rounded-md border ${tab === "activities" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>Activity Tracker</button>
           <button onClick={() => setTab("dsp")} className={`px-3 py-2 rounded-md border ${tab === "dsp" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>DSP</button>
+          <button onClick={() => setTab("meetings")} className={`px-3 py-2 rounded-md border flex items-center gap-1.5 ${tab === "meetings" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>
+            <CalendarDays className="h-3.5 w-3.5" /> Meetings
+            <span className={`h-1.5 w-1.5 rounded-full ${meetingsComplete ? "bg-[color:var(--status-green)]" : "bg-[color:var(--status-orange)]"}`} />
+          </button>
         </div>
         <div className="flex items-center gap-2 pl-3 border-l border-border">
           <span className="text-muted-foreground text-[11px]">Status</span>
           <StatusTag tone={statusTone[workflowStatus]}>{workflowStatus}</StatusTag>
           <select
             value={workflowStatus}
-            onChange={e => setWorkflowStatus(e.target.value as WFStatus)}
+            onChange={e => {
+              const next = e.target.value as WFStatus;
+              if (next === "Completed" && !meetingsComplete) { setTab("meetings"); return; }
+              setWorkflowStatus(next);
+            }}
             className="h-7 px-1.5 rounded border border-border bg-input/60 text-[11px]"
           >
             {WORKFLOW_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
+          {!meetingsComplete && (
+            <span className="text-[10px] text-[color:var(--status-orange)] flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" /> Meeting comments &amp; summary required to close the gate
+            </span>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 xl:col-span-9 space-y-4">
-          {tab === "activities" ? (
+          {tab === "activities" && (
             <ActivityTracker
               stage={stage}
               activities={activities}
               setActivities={setActivities}
               openReminder={(a) => setReminderFor({ kind: "activity", id: a.id, label: a.title })}
             />
-          ) : (
+          )}
+          {tab === "dsp" && (
             <DspEditor
               stage={stage}
               sections={dspNodes}
@@ -198,8 +232,11 @@ function WorkloadPage() {
               selectedId={dspSelectedId}
               setSelectedId={setDspSelectedId}
               openReminder={(id, label) => setReminderFor({ kind: "section", id, label })}
+              onOpenTagValues={() => setTagValuesOpen(true)}
+              tagValues={tagValues}
             />
           )}
+          {tab === "meetings" && <MeetingsPanel meetings={meetings} setMeetings={setMeetings} stage={stage} />}
         </div>
 
         <div className="col-span-12 xl:col-span-3 space-y-4">
@@ -213,6 +250,9 @@ function WorkloadPage() {
       {reminderFor && <ReminderModal target={reminderFor} onClose={() => setReminderFor(null)} />}
       {commentsModal && <AllCommentsModal onClose={() => setCommentsModal(false)} />}
       {historyModal && <HistoryModal onClose={() => setHistoryModal(false)} />}
+      {finalDspOpen && <FinalDspModal stage={stage} version={version} project={`${project.code} — ${project.name}`} sections={dspNodes} tagValues={tagValues} onClose={() => setFinalDspOpen(false)} />}
+      {presentationOpen && <PresentationModal stage={stage} sections={dspNodes} onClose={() => setPresentationOpen(false)} />}
+      {tagValuesOpen && <TagValuesModal values={tagValues} setValues={setTagValues} project={project.name} onClose={() => setTagValuesOpen(false)} />}
 
       <div className="mt-4 text-[10px] text-muted-foreground">
         Project: <span className="text-foreground/70">{project.code} — {project.name}</span>
@@ -346,30 +386,60 @@ function ActivityTracker({
 
 /* ------------------------------ DSP editor ---------------------------------- */
 
-type DspNode = { id: string; title: string; children?: DspNode[]; assignedTeam?: string };
+type SectionStatus = "not-started" | "in-progress" | "completed";
+type Attachment = { id: string; name: string; showInFinal: boolean };
+type DspNode = {
+  id: string;
+  title: string;
+  children?: DspNode[];
+  assignedUser?: string;
+  status?: SectionStatus;
+  target?: string;
+  comments?: number;
+  attachments?: Attachment[];
+};
 
-function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder }: {
+function seedNode(id: string, title: string, i: number): DspNode {
+  const statuses: SectionStatus[] = ["completed", "in-progress", "not-started"];
+  const targets = ["2026-07-10", "2026-08-15", "2026-09-30", "2026-10-20"];
+  return {
+    id,
+    title,
+    status: statuses[i % 3],
+    target: targets[i % 4],
+    comments: i % 5 === 0 ? 3 : i % 3 === 0 ? 1 : 0,
+    attachments: i % 4 === 0 ? [{ id: `${id}-a1`, name: "supporting-note.pdf", showInFinal: true }] : [],
+  };
+}
+
+const TODAY = new Date().toISOString().slice(0, 10);
+const isOverdue = (n: DspNode) => !!n.target && n.target < TODAY && n.status !== "completed";
+const prevStage: Record<Stage, Stage | null> = { SG1: null, SG2: "SG1", "SG3.1": "SG2", "SG3.2": "SG3.1" };
+
+function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder, onOpenTagValues, tagValues }: {
   stage: Stage;
   sections: DspNode[];
   setSections: (s: DspNode[]) => void;
   selectedId: string;
   setSelectedId: (id: string) => void;
   openReminder: (id: string, label: string) => void;
+  onOpenTagValues: () => void;
+  tagValues: Record<string, string>;
 }) {
   const dspKey = stageToDsp[stage];
   const meta = dspSections[dspKey];
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [blocks, setBlocks] = useState<Record<string, ContentBlock[]>>({});
-  const [targets, setTargets] = useState<Record<string, string>>({});
   const [edmOpen, setEdmOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [validationTick, setValidationTick] = useState(0);
+  const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
 
   const selected = findNode(sections, selectedId);
 
   const addSection = () => {
     const id = `s-new-${sections.length}`;
-    setSections([...sections, { id, title: "New section" }]);
+    setSections([...sections, { id, title: "New section", status: "not-started", comments: 0, attachments: [] }]);
     setSelectedId(id);
   };
   const addSubsection = (parentId: string) => {
@@ -407,6 +477,7 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
           <div className="flex gap-1 mb-2 px-1">
             <button onClick={addSection} className="text-[10px] px-2 py-1 rounded border border-border hover:bg-secondary flex items-center gap-1"><Plus className="h-3 w-3" />Section</button>
             <button onClick={() => addSubsection(selectedId.split("-c-")[0])} className="text-[10px] px-2 py-1 rounded border border-border hover:bg-secondary flex items-center gap-1"><Plus className="h-3 w-3" />Subsection</button>
+            <button onClick={onOpenTagValues} className="text-[10px] px-2 py-1 rounded border border-primary/40 text-primary hover:bg-primary/10 flex items-center gap-1"><Tag className="h-3 w-3" />Tag Values</button>
           </div>
           <TreeView
             nodes={sections}
@@ -427,31 +498,55 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
                     value={selected.title}
                     onChange={e => updateNode(selected.id, { title: e.target.value })}
                   />
-                  <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1"><Info className="h-3 w-3" /> Section info</span>
+                    <StatusTag tone={selected.status === "completed" ? "green" : selected.status === "in-progress" ? "orange" : "grey"}>
+                      {(selected.status ?? "not-started").replace("-", " ")}
+                    </StatusTag>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border text-[10px]">
+                      <MessageSquare className="h-3 w-3" /> {selected.comments ?? 0} comments
+                    </span>
+                    {isOverdue(selected) && (
+                      <StatusTag tone="red"><AlertTriangle className="h-3 w-3" /> Overdue</StatusTag>
+                    )}
                   </div>
                 </div>
-                <button
-                  onClick={() => openReminder(selected.id, selected.title)}
-                  className="h-8 px-3 rounded border border-border text-[11px] flex items-center gap-1.5 hover:bg-secondary"
-                >
-                  <Bell className="h-3.5 w-3.5" /> Reminder
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    disabled={!prevStage[stage]}
+                    onClick={() => { setCopiedFrom(prevStage[stage]); updateNode(selected.id, { status: "in-progress" }); }}
+                    title={prevStage[stage] ? `Copy this section's content from ${prevStage[stage]}` : "No previous stage gate"}
+                    className="h-8 px-3 rounded border border-border text-[11px] flex items-center gap-1.5 hover:bg-secondary disabled:opacity-40"
+                  >
+                    <Copy className="h-3.5 w-3.5" /> Copy from {prevStage[stage] ?? "—"}
+                  </button>
+                  <button
+                    onClick={() => openReminder(selected.id, selected.title)}
+                    className="h-8 px-3 rounded border border-border text-[11px] flex items-center gap-1.5 hover:bg-secondary"
+                  >
+                    <Bell className="h-3.5 w-3.5" /> Reminder
+                  </button>
+                </div>
               </div>
+              {copiedFrom && (
+                <div className="mt-2 text-[10px] text-[color:var(--status-green)] flex items-center gap-1">
+                  <Check className="h-3 w-3" /> Content copied from {copiedFrom} — review and update before submission.
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs">
                 <div>
-                  <div className="text-[10px] text-muted-foreground mb-1">Assign Team</div>
+                  <div className="text-[10px] text-muted-foreground mb-1">Assign User</div>
                   <select
-                    value={selected.assignedTeam ?? ""}
-                    onChange={e => updateNode(selected.id, { assignedTeam: e.target.value || undefined })}
+                    value={selected.assignedUser ?? ""}
+                    onChange={e => updateNode(selected.id, { assignedUser: e.target.value || undefined })}
                     className="h-8 w-full rounded border border-border bg-input/60 text-[11px] px-2"
                   >
                     <option value="">Unassigned</option>
-                    {allTeams.map(t => <option key={t} value={t}>{t}</option>)}
+                    {appUsers.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <button
-                    onClick={() => updateNode(selected.id, { assignedTeam: CURRENT_USER })}
+                    onClick={() => updateNode(selected.id, { assignedUser: CURRENT_USER })}
                     className="mt-1 text-[10px] text-primary hover:underline flex items-center gap-1"
                   >
                     <UserPlus className="h-3 w-3" /> Assign to myself
@@ -461,18 +556,26 @@ function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, op
                   <div className="text-[10px] text-muted-foreground mb-1">Target Date</div>
                   <input
                     type="date"
-                    value={targets[selected.id] ?? ""}
-                    onChange={e => setTargets({ ...targets, [selected.id]: e.target.value })}
+                    value={selected.target ?? ""}
+                    onChange={e => updateNode(selected.id, { target: e.target.value })}
                     className="h-8 w-full rounded border border-border bg-input/60 text-[11px] px-2"
                   />
                 </div>
                 <div>
-                  <div className="text-[10px] text-muted-foreground mb-1">Assigned to</div>
-                  <div className="h-8 flex items-center px-2 rounded border border-border bg-secondary/30 text-[11px]">
-                    {selected.assignedTeam ?? "—"}
-                  </div>
+                  <div className="text-[10px] text-muted-foreground mb-1">Status</div>
+                  <select
+                    value={selected.status ?? "not-started"}
+                    onChange={e => updateNode(selected.id, { status: e.target.value as SectionStatus })}
+                    className="h-8 w-full rounded border border-border bg-input/60 text-[11px] px-2"
+                  >
+                    <option value="not-started">Not started</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
                 </div>
               </div>
+
+              <AttachmentsBlock node={selected} onChange={patch => updateNode(selected.id, patch)} />
 
               <div className="mt-5">
                 <div className="flex items-center justify-between mb-2">
@@ -875,7 +978,15 @@ function TreeView({
                 {expanded[n.id] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               </button>
             ) : <span className="w-3" />}
-            <span className="truncate">{n.title}</span>
+            <span className={`h-2 w-2 rounded-full shrink-0 ${n.status === "completed" ? "bg-[color:var(--status-green)]" : n.status === "in-progress" ? "bg-[color:var(--status-orange)]" : "bg-[color:var(--status-grey)]"}`} />
+            <span className="truncate flex-1">{n.title}</span>
+            {isOverdue(n) && <AlertTriangle className="h-3 w-3 text-[color:var(--status-red)] shrink-0" />}
+            {!!n.comments && (
+              <span className="shrink-0 inline-flex items-center gap-0.5 text-[9px] px-1 rounded-full border border-border text-muted-foreground">
+                <MessageSquare className="h-2.5 w-2.5" />{n.comments}
+              </span>
+            )}
+            {!!n.attachments?.length && <Paperclip className="h-3 w-3 text-muted-foreground shrink-0" />}
           </div>
           {n.children && expanded[n.id] && (
             <TreeView nodes={n.children} selectedId={selectedId} expanded={expanded} onSelect={onSelect} onToggle={onToggle} depth={depth + 1} />
@@ -1196,4 +1307,243 @@ function HistoryModal({ onClose }: { onClose: () => void }) {
       </table>
     </Modal>
   );
+}
+
+/* ------------------------------ Attachments --------------------------------- */
+
+function AttachmentsBlock({ node, onChange }: { node: DspNode; onChange: (patch: Partial<DspNode>) => void }) {
+  const list = node.attachments ?? [];
+  const add = () => onChange({ attachments: [...list, { id: `${node.id}-a${list.length + 1}`, name: `attachment-${list.length + 1}.pdf`, showInFinal: true }] });
+  const update = (id: string, patch: Partial<Attachment>) => onChange({ attachments: list.map(a => a.id === id ? { ...a, ...patch } : a) });
+  return (
+    <div className="mt-4 rounded border border-border p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-xs text-muted-foreground flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" />Attachments</div>
+        <button onClick={add} className="h-7 px-2 rounded border border-border text-[10px] flex items-center gap-1 hover:bg-secondary"><Plus className="h-3 w-3" />Add attachment</button>
+      </div>
+      {list.length === 0 ? (
+        <div className="text-[11px] text-muted-foreground italic">No attachments. Uploaded files can be shown or hidden in the final DSP.</div>
+      ) : (
+        <div className="space-y-1.5">
+          {list.map(a => (
+            <div key={a.id} className="flex items-center gap-2 text-[11px] border border-border rounded px-2 py-1.5">
+              <Paperclip className="h-3 w-3 text-muted-foreground" />
+              <input value={a.name} onChange={e => update(a.id, { name: e.target.value })} className="flex-1 bg-transparent outline-none" />
+              <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <input type="checkbox" checked={a.showInFinal} onChange={e => update(a.id, { showInFinal: e.target.checked })} className="accent-[color:var(--accent-blue)]" />
+                Show in final DSP
+              </label>
+              <button onClick={() => onChange({ attachments: list.filter(x => x.id !== a.id) })} className="text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------ Meetings ------------------------------------ */
+
+type Meeting = { id: string; title: string; date: string; attendees: string; comments: string; summary: string };
+
+const initialMeetings: Meeting[] = [
+  { id: "m1", title: "Meeting 1 — Kickoff review", date: "2026-06-12", attendees: "IE, FD, Drilling, CPA", comments: "Profiles to be reconciled with AAP before next review.", summary: "Scope confirmed, 24 wells retained." },
+  { id: "m2", title: "Meeting 2 — Assurance walkthrough", date: "2026-07-08", attendees: "CPA, Planning, Engineering A", comments: "", summary: "" },
+  { id: "m3", title: "Meeting 3 — Pre-gate alignment", date: "2026-08-05", attendees: "Gate Keeper, Planning, IE", comments: "", summary: "" },
+];
+
+function MeetingsPanel({ meetings, setMeetings, stage }: { meetings: Meeting[]; setMeetings: (m: Meeting[]) => void; stage: Stage }) {
+  const [openId, setOpenId] = useState(meetings[0]?.id ?? "");
+  const update = (id: string, patch: Partial<Meeting>) => setMeetings(meetings.map(m => m.id === id ? { ...m, ...patch } : m));
+  const add = () => {
+    const id = `m${meetings.length + 1}-${Date.now()}`;
+    setMeetings([...meetings, { id, title: `Meeting ${meetings.length + 1}`, date: "", attendees: "", comments: "", summary: "" }]);
+    setOpenId(id);
+  };
+  const active = meetings.find(m => m.id === openId) ?? meetings[0];
+  const incomplete = meetings.filter(m => !m.comments.trim() || !m.summary.trim()).length;
+
+  return (
+    <Panel className="p-4">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div>
+          <div className="text-sm font-semibold">Meeting Details · {stage}</div>
+          <div className="text-[11px] text-muted-foreground">Meeting comments and summary are mandatory before the stage gate can be closed.</div>
+        </div>
+        <div className="flex items-center gap-2">
+          {incomplete > 0
+            ? <StatusTag tone="orange"><AlertTriangle className="h-3 w-3" />{incomplete} meeting{incomplete === 1 ? "" : "s"} incomplete</StatusTag>
+            : <StatusTag tone="green"><Check className="h-3 w-3" />All meetings recorded</StatusTag>}
+          <button onClick={add} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1.5"><Plus className="h-3.5 w-3.5" />Add Meeting</button>
+        </div>
+      </div>
+
+      <div className="flex gap-1 mb-3 flex-wrap text-xs">
+        {meetings.map(m => {
+          const ok = m.comments.trim() && m.summary.trim();
+          return (
+            <button key={m.id} onClick={() => setOpenId(m.id)} className={`px-3 py-1.5 rounded-md border flex items-center gap-1.5 ${openId === m.id ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>
+              <span className={`h-2 w-2 rounded-full ${ok ? "bg-[color:var(--status-green)]" : "bg-[color:var(--status-orange)]"}`} />
+              {m.title}
+            </button>
+          );
+        })}
+      </div>
+
+      {active && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <label className="text-[10px] text-muted-foreground">Title
+              <input value={active.title} onChange={e => update(active.id, { title: e.target.value })} className="mt-1 h-8 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+            </label>
+            <label className="text-[10px] text-muted-foreground">Date
+              <input type="date" value={active.date} onChange={e => update(active.id, { date: e.target.value })} className="mt-1 h-8 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+            </label>
+            <label className="text-[10px] text-muted-foreground">Attendees
+              <input value={active.attendees} onChange={e => update(active.id, { attendees: e.target.value })} className="mt-1 h-8 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+            </label>
+          </div>
+          <label className="block text-[10px] text-muted-foreground">
+            Meeting comments <span className="text-[color:var(--status-red)]">*</span>
+            <textarea value={active.comments} onChange={e => update(active.id, { comments: e.target.value })}
+              placeholder="Record comments raised during the meeting…"
+              className={`mt-1 w-full min-h-[90px] p-2 rounded border bg-input/60 text-xs ${active.comments.trim() ? "border-border" : "border-[color:var(--status-orange)]/50"}`} />
+          </label>
+          <label className="block text-[10px] text-muted-foreground">
+            Meeting summary <span className="text-[color:var(--status-red)]">*</span>
+            <textarea value={active.summary} onChange={e => update(active.id, { summary: e.target.value })}
+              placeholder="Summarise outcomes, decisions and actions…"
+              className={`mt-1 w-full min-h-[90px] p-2 rounded border bg-input/60 text-xs ${active.summary.trim() ? "border-border" : "border-[color:var(--status-orange)]/50"}`} />
+          </label>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/* ------------------------------ Tag values ---------------------------------- */
+
+function TagValuesModal({ values, setValues, project, onClose }: { values: Record<string, string>; setValues: (v: Record<string, string>) => void; project: string; onClose: () => void }) {
+  return (
+    <Modal title={`Tag Values — ${project}`} onClose={onClose}>
+      <p className="text-[11px] text-muted-foreground mb-3">
+        Assign this project's values to the auto text tags. Tags resolve automatically in DSP content, components and reports.
+      </p>
+      <table className="w-full text-xs">
+        <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <tr>{["Tag", "Label", "Value for this project"].map(h => <th key={h} className="text-left py-1.5 pr-2">{h}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {autoTextTags.map(t => (
+            <tr key={t.tag}>
+              <td className="py-2 pr-2 font-mono text-primary whitespace-nowrap">{t.tag}</td>
+              <td className="py-2 pr-2 text-muted-foreground">{t.label}</td>
+              <td className="py-2 pr-2">
+                <input value={values[t.tag] ?? ""} onChange={e => setValues({ ...values, [t.tag]: e.target.value })}
+                  className="h-7 w-full rounded border border-border bg-input/60 px-2 text-[11px]" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 flex justify-end">
+        <button onClick={onClose} className="h-9 px-3 rounded bg-primary text-primary-foreground text-xs">Save values</button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ------------------------------ Final DSP & presentation -------------------- */
+
+function FinalDspModal({ stage, version, project, sections, tagValues, onClose }: {
+  stage: Stage; version: string; project: string; sections: DspNode[]; tagValues: Record<string, string>; onClose: () => void;
+}) {
+  const flat = flatten(sections);
+  const done = flat.filter(s => s.status === "completed").length;
+  return (
+    <Modal title={`Final DSP — ${stage} ${version}`} onClose={onClose}>
+      <div className="rounded-lg border border-border p-5 bg-secondary/10">
+        <div className="text-center border-b border-border pb-3 mb-4">
+          <div className="text-lg font-semibold">{tagValues["{{Project_Name}}"] || project}</div>
+          <div className="text-[11px] text-muted-foreground mt-1">
+            Delivery Support Package · {stage} · {version} · {tagValues["{{Number_Of_Wells}}"] || "—"} wells · Total {tagValues["{{Total_Cost}}"] || "—"} (000 KD)
+          </div>
+          <div className="mt-2"><StatusTag tone="blue">{done} of {flat.length} sections completed</StatusTag></div>
+        </div>
+        <div className="space-y-3">
+          {flat.map((s, i) => (
+            <div key={s.id} className="border-b border-border/60 pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-sm font-medium">{i + 1}. {s.title}</div>
+                <div className="flex items-center gap-1.5">
+                  {isOverdue(s) && <StatusTag tone="red">Overdue</StatusTag>}
+                  <StatusTag tone={s.status === "completed" ? "green" : s.status === "in-progress" ? "orange" : "grey"}>{(s.status ?? "not-started").replace("-", " ")}</StatusTag>
+                </div>
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-1">
+                Owner {s.assignedUser ?? "—"} · Target {s.target || "—"}
+              </div>
+              {(s.attachments ?? []).filter(a => a.showInFinal).length > 0 && (
+                <div className="mt-1 text-[10px] text-muted-foreground flex items-center gap-1 flex-wrap">
+                  <Paperclip className="h-3 w-3" />
+                  {(s.attachments ?? []).filter(a => a.showInFinal).map(a => a.name).join(", ")}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className="mt-3 text-[10px] text-muted-foreground italic">Read-only rendering of the compiled DSP. Hidden attachments are excluded.</p>
+    </Modal>
+  );
+}
+
+function PresentationModal({ stage, sections, onClose }: { stage: Stage; sections: DspNode[]; onClose: () => void }) {
+  const [mode, setMode] = useState<"view" | "edit">("view");
+  const [slides, setSlides] = useState(() => [
+    { id: "sl1", title: `${stage} Stage Gate Review`, body: "Project overview, scope and objectives." },
+    { id: "sl2", title: "Scope & Well Profiles", body: flatten(sections).slice(0, 4).map(s => `• ${s.title}`).join("\n") },
+    { id: "sl3", title: "Cost & Schedule", body: "• Total cost\n• Stage completion dates" },
+    { id: "sl4", title: "Risks & Assurance", body: "• Open CPA comments\n• Validation summary" },
+  ]);
+  const update = (id: string, patch: Partial<{ title: string; body: string }>) => setSlides(slides.map(s => s.id === id ? { ...s, ...patch } : s));
+
+  return (
+    <Modal title={`Presentation — ${stage}`} onClose={onClose}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex gap-1 text-xs">
+          {(["view", "edit"] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)} className={`px-3 py-1.5 rounded border capitalize ${mode === m ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground"}`}>{m}</button>
+          ))}
+        </div>
+        {mode === "edit" && (
+          <button onClick={() => setSlides([...slides, { id: `sl${slides.length + 1}`, title: "New slide", body: "" }])} className="h-8 px-3 rounded border border-border text-xs flex items-center gap-1.5"><Plus className="h-3.5 w-3.5" />Add slide</button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {slides.map((s, i) => (
+          <div key={s.id} className="rounded border border-border overflow-hidden">
+            <div className="px-2 py-1 text-[10px] bg-secondary/40 text-muted-foreground border-b border-border">Slide {i + 1}</div>
+            <div className="p-3 min-h-[130px] bg-secondary/10">
+              {mode === "view" ? (
+                <>
+                  <div className="text-sm font-semibold mb-1.5">{s.title}</div>
+                  <div className="text-[11px] text-muted-foreground whitespace-pre-line">{s.body}</div>
+                </>
+              ) : (
+                <>
+                  <input value={s.title} onChange={e => update(s.id, { title: e.target.value })} className="h-7 w-full rounded border border-border bg-input/60 px-2 text-xs mb-1.5" />
+                  <textarea value={s.body} onChange={e => update(s.id, { body: e.target.value })} className="w-full min-h-[80px] rounded border border-border bg-input/60 p-2 text-[11px]" />
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Modal>
+  );
+}
+
+function flatten(nodes: DspNode[]): DspNode[] {
+  return nodes.flatMap(n => [n, ...(n.children ? flatten(n.children) : [])]);
 }

@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel, StatusDot, StatusTag } from "@/components/shell";
-import { dspSections, dsp31Design, projects } from "@/lib/mock";
+import { dspSections, dsp31Design, projects, workActivitiesByStage } from "@/lib/mock";
 
 const stages = [
   { id: "1.0", name: "SG1.0 Identification" },
@@ -57,12 +57,18 @@ function StageGates() {
             <div className="text-sm font-semibold">Required DSP Sections</div>
             <StatusTag tone="blue">{meta.sections.length} sections</StatusTag>
           </div>
+          <SectionProgress total={meta.sections.length} />
           <div className="grid grid-cols-2 gap-2">
             {meta.sections.map((s,i)=>(
-              <div key={s} className="flex items-center gap-2 text-xs px-3 py-2 rounded border border-border bg-secondary/20">
+              <Link
+                key={s}
+                to="/workload"
+                title="Open in Workload"
+                className="flex items-center gap-2 text-xs px-3 py-2 rounded border border-border bg-secondary/20 hover:border-primary/40 hover:bg-primary/5 transition"
+              >
                 <StatusDot status={i%4===0?"completed":i%4===1?"in-progress":i%4===2?"not-started":"overdue"}/>
                 <span className="truncate">{s}</span>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -129,6 +135,8 @@ function StageGates() {
         </div>
       </div>
 
+      <ActivityGantt stage={stage}/>
+
       {/* Stage history */}
       <Panel className="p-5 mt-4">
         <div className="text-sm font-semibold mb-3">Stage History Timeline</div>
@@ -155,6 +163,78 @@ function Summary({label,value,tone}:{label:string;value:string;tone:"blue"|"oran
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="mt-1 text-sm font-medium">{value}</div>
       <div className="mt-2"><StatusTag tone={tone}>tracked</StatusTag></div>
+    </Panel>
+  );
+}
+
+function SectionProgress({ total }: { total: number }) {
+  const completed = Math.round(total * 0.45);
+  const inProgress = Math.round(total * 0.2);
+  const pct = Math.round((completed / total) * 100);
+  return (
+    <div className="mb-3">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1">
+        <span>{completed} completed · {inProgress} in progress · {total - completed - inProgress} not started</span>
+        <span className="text-foreground font-medium">{pct}%</span>
+      </div>
+      <div className="h-2 rounded-full bg-secondary overflow-hidden flex">
+        <div className="h-full bg-[color:var(--status-green)]" style={{ width: `${pct}%` }} />
+        <div className="h-full bg-[color:var(--status-orange)]" style={{ width: `${Math.round((inProgress/total)*100)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function ActivityGantt({ stage }: { stage: "1.0"|"2.0"|"3.1"|"3.2" }) {
+  const key = stage === "1.0" ? "SG1" : stage === "2.0" ? "SG2" : stage === "3.1" ? "SG3.1" : "SG3.2";
+  const acts = workActivitiesByStage[key as "SG1"|"SG2"|"SG3.1"|"SG3.2"];
+  const [onlyDelayed, setOnlyDelayed] = useState(false);
+  const today = new Date();
+  const parsed = acts.map((a, i) => {
+    const end = a.target ? new Date(a.target) : new Date();
+    const start = new Date(end.getTime() - (10 + (i % 4) * 6) * 86400000);
+    const delayed = end < today && a.status !== "completed";
+    return { ...a, start, end, delayed };
+  });
+  const rows = onlyDelayed ? parsed.filter(a => a.delayed) : parsed;
+  const min = Math.min(...parsed.map(a => a.start.getTime()));
+  const max = Math.max(...parsed.map(a => a.end.getTime()));
+  const span = Math.max(max - min, 1);
+  const pos = (t: number) => ((t - min) / span) * 100;
+  const delayedCount = parsed.filter(a => a.delayed).length;
+
+  return (
+    <Panel className="p-5 mt-4">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div>
+          <div className="text-sm font-semibold">Activity Gantt — target dates</div>
+          <div className="text-[11px] text-muted-foreground">Bars are drawn from planned start to target date. Red bars are past their target.</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusTag tone={delayedCount ? "red" : "green"}>{delayedCount} delayed</StatusTag>
+          <button onClick={() => setOnlyDelayed(!onlyDelayed)} className={`h-8 px-3 rounded-md border text-xs ${onlyDelayed ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>
+            {onlyDelayed ? "Showing delayed only" : "Filter: delayed only"}
+          </button>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        {rows.map(a => (
+          <div key={a.id} className="grid grid-cols-12 items-center gap-2 text-[11px]">
+            <div className="col-span-4 truncate flex items-center gap-1.5">
+              <StatusDot status={a.delayed ? "overdue" : a.status}/>{a.id} · {a.title}
+            </div>
+            <div className="col-span-7 relative h-4 rounded bg-secondary/40 overflow-hidden">
+              <div
+                className={`absolute top-0 h-full rounded ${a.delayed ? "bg-[color:var(--status-red)]/70" : a.status === "completed" ? "bg-[color:var(--status-green)]/70" : "bg-primary/60"}`}
+                style={{ left: `${pos(a.start.getTime())}%`, width: `${Math.max(pos(a.end.getTime()) - pos(a.start.getTime()), 2)}%` }}
+              />
+              <div className="absolute top-0 h-full w-px bg-[color:var(--status-red)]" style={{ left: `${Math.min(Math.max(pos(today.getTime()), 0), 100)}%` }} />
+            </div>
+            <div className="col-span-1 text-right text-muted-foreground">{a.target ?? "—"}</div>
+          </div>
+        ))}
+        {rows.length === 0 && <div className="text-[11px] text-muted-foreground italic py-4 text-center">No delayed activities for this stage.</div>}
+      </div>
     </Panel>
   );
 }

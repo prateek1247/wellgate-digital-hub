@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkloadRouteImport } from './routes/workload'
+import { Route as WellSchematicsRouteImport } from './routes/well-schematics'
+import { Route as WellMontageRouteImport } from './routes/well-montage'
 import { Route as WellDesignsRouteImport } from './routes/well-designs'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TeamsRouteImport } from './routes/teams'
@@ -25,6 +27,16 @@ import { Route as IndexRouteImport } from './routes/index'
 const WorkloadRoute = WorkloadRouteImport.update({
   id: '/workload',
   path: '/workload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WellSchematicsRoute = WellSchematicsRouteImport.update({
+  id: '/well-schematics',
+  path: '/well-schematics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WellMontageRoute = WellMontageRouteImport.update({
+  id: '/well-montage',
+  path: '/well-montage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WellDesignsRoute = WellDesignsRouteImport.update({
@@ -95,6 +107,8 @@ export interface FileRoutesByFullPath {
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
   '/well-designs': typeof WellDesignsRoute
+  '/well-montage': typeof WellMontageRoute
+  '/well-schematics': typeof WellSchematicsRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +123,8 @@ export interface FileRoutesByTo {
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
   '/well-designs': typeof WellDesignsRoute
+  '/well-montage': typeof WellMontageRoute
+  '/well-schematics': typeof WellSchematicsRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRoutesById {
@@ -124,6 +140,8 @@ export interface FileRoutesById {
   '/teams': typeof TeamsRoute
   '/templates': typeof TemplatesRoute
   '/well-designs': typeof WellDesignsRoute
+  '/well-montage': typeof WellMontageRoute
+  '/well-schematics': typeof WellSchematicsRoute
   '/workload': typeof WorkloadRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +158,8 @@ export interface FileRouteTypes {
     | '/teams'
     | '/templates'
     | '/well-designs'
+    | '/well-montage'
+    | '/well-schematics'
     | '/workload'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +174,8 @@ export interface FileRouteTypes {
     | '/teams'
     | '/templates'
     | '/well-designs'
+    | '/well-montage'
+    | '/well-schematics'
     | '/workload'
   id:
     | '__root__'
@@ -168,6 +190,8 @@ export interface FileRouteTypes {
     | '/teams'
     | '/templates'
     | '/well-designs'
+    | '/well-montage'
+    | '/well-schematics'
     | '/workload'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +207,8 @@ export interface RootRouteChildren {
   TeamsRoute: typeof TeamsRoute
   TemplatesRoute: typeof TemplatesRoute
   WellDesignsRoute: typeof WellDesignsRoute
+  WellMontageRoute: typeof WellMontageRoute
+  WellSchematicsRoute: typeof WellSchematicsRoute
   WorkloadRoute: typeof WorkloadRoute
 }
 
@@ -193,6 +219,20 @@ declare module '@tanstack/react-router' {
       path: '/workload'
       fullPath: '/workload'
       preLoaderRoute: typeof WorkloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-schematics': {
+      id: '/well-schematics'
+      path: '/well-schematics'
+      fullPath: '/well-schematics'
+      preLoaderRoute: typeof WellSchematicsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-montage': {
+      id: '/well-montage'
+      path: '/well-montage'
+      fullPath: '/well-montage'
+      preLoaderRoute: typeof WellMontageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/well-designs': {
@@ -287,6 +327,8 @@ const rootRouteChildren: RootRouteChildren = {
   TeamsRoute: TeamsRoute,
   TemplatesRoute: TemplatesRoute,
   WellDesignsRoute: WellDesignsRoute,
+  WellMontageRoute: WellMontageRoute,
+  WellSchematicsRoute: WellSchematicsRoute,
   WorkloadRoute: WorkloadRoute,
 }
 export const routeTree = rootRouteImport
