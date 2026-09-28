@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
+import { ClosureTasksPanel, initialClosureTasks, type ClosureTask } from "@/components/closure-tasks";
 import {
   projects,
   dspSections,
@@ -70,7 +71,8 @@ function WorkloadPage() {
   const project = projects.find(p => p.code === projectCode) ?? projects[0];
   const [stage, setStage] = useState<Stage>("SG3.1");
   const [version, setVersion] = useState(stageVersions[stage][0]);
-  const [tab, setTab] = useState<"activities" | "dsp" | "meetings">("activities");
+  const [tab, setTab] = useState<"activities" | "dsp" | "meetings" | "closure">("activities");
+  const [closureTasks, setClosureTasks] = useState<ClosureTask[]>(initialClosureTasks);
   const [activities, setActivities] = useState<WorkActivity[]>(workActivitiesByStage[stage]);
   useEffect(() => { setActivities(workActivitiesByStage[stage]); }, [stage]);
 
@@ -191,6 +193,10 @@ function WorkloadPage() {
             <CalendarDays className="h-3.5 w-3.5" /> Meetings
             <span className={`h-1.5 w-1.5 rounded-full ${meetingsComplete ? "bg-[color:var(--status-green)]" : "bg-[color:var(--status-orange)]"}`} />
           </button>
+          <button onClick={() => setTab("closure")} className={`px-3 py-2 rounded-md border flex items-center gap-1.5 ${tab === "closure" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}>
+            Closure Tasks
+            <span className="text-[10px] px-1.5 rounded-full bg-secondary">{closureTasks.filter(t => t.targetStage === stage && t.status !== "Closed").length}</span>
+          </button>
         </div>
         <div className="flex items-center gap-2 pl-3 border-l border-border">
           <span className="text-muted-foreground text-[11px]">Status</span>
@@ -237,6 +243,7 @@ function WorkloadPage() {
             />
           )}
           {tab === "meetings" && <MeetingsPanel meetings={meetings} setMeetings={setMeetings} stage={stage} />}
+          {tab === "closure" && <ClosureTasksPanel stage={stage} tasks={closureTasks} setTasks={setClosureTasks} owners={appUsers} />}
         </div>
 
         <div className="col-span-12 xl:col-span-3 space-y-4">
