@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { AssistantWidget } from "./assistant";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -113,6 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">{children}</main>
+        <AssistantWidget />
       </div>
     </div>
   );
