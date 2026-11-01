@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
-import { allTeams, projects, autoTextTags, componentTemplates, type ComponentTemplate, type AutoTag } from "@/lib/mock";
+import { allTeams, projects, autoTextTags, componentTemplates, workActivitiesByStage, STAGE_GATES, stageGatePhase, type StageGate, type ComponentTemplate, type AutoTag } from "@/lib/mock";
 import { FilePlus, Edit3, Check, Plus, X, Copy, FileText, Image as ImageIcon, Table as TableIcon, Trash2, Filter, Tag, LayoutTemplate } from "lucide-react";
 
 export const Route = createFileRoute("/templates")({
@@ -9,8 +9,8 @@ export const Route = createFileRoute("/templates")({
   component: Templates,
 });
 
-const STAGE_GATES = ["SG1", "SG2", "SG3.1"] as const;
-type SG = typeof STAGE_GATES[number];
+type SG = StageGate;
+const bySG = <T,>(fn: (sg: SG) => T) => Object.fromEntries(STAGE_GATES.map(sg => [sg, fn(sg)])) as Record<SG, T>;
 
 type ProjectTemplate = {
   id: string;
@@ -18,7 +18,7 @@ type ProjectTemplate = {
   v: string;
   status: "Active" | "Draft";
   dspBySG: Record<SG, string>;
-  activityTemplate: string;
+  activityBySG: Record<SG, string>;
   validationRuleset: string;
   raci: string;
   reportsBySG: Record<SG, string[]>;
@@ -29,32 +29,42 @@ type ProjectTemplate = {
 const initialProjectTemplates: ProjectTemplate[] = [
   {
     id:"pt-dev", name:"Development Wells Template", v:"3.2", status:"Active",
-    dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Development v3.6", "SG3.1":"DSP 3.1 v5.0" },
-    activityTemplate:"Development Wells Activities v2.1", validationRuleset:"Standard Ruleset v1.4", raci:"Well Delivery RACI v2.0",
-    reportsBySG: { SG1:["SG1 Identification Report"], SG2:["Concept Options Report","Long Lead Item Report"], "SG3.1":["Design Pack","RAROC Summary"] },
+    dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Development v3.6", "SG3.1":"DSP 3.1 v5.0", "SG3.2":"DSP 3.2 Procurement v2.2", SG4:"DSP 4.0 Execution v1.0", SG5:"DSP 5.0 Closure v1.0" },
+    activityBySG: { SG1:"Development Wells Activities v2.1", SG2:"SG2 Concept Selection Activities v1.5", "SG3.1":"SG3.1 Design Activities v1.3", "SG3.2":"SG3.2 Procurement Activities v1.0", SG4:"SG4 Execution Activities v1.0", SG5:"SG5 Closure Activities v1.0" },
+    validationRuleset:"Standard Ruleset v1.4", raci:"Well Delivery RACI v2.0",
+    reportsBySG: { SG1:["SG1 Identification Report"], SG2:["Concept Options Report","Long Lead Item Report"], "SG3.1":["Design Pack","RAROC Summary"], "SG3.2":["Procurement Status Report"], SG4:["Execution Performance Report"], SG5:["Project Close-out Report"] },
     assuranceReport: "CPA Assurance Report v3.0",
     reviewPack: "Gate Review Pack v2.4",
   },
   {
     id:"pt-expl", name:"Exploration Wells Template", v:"2.1", status:"Active",
-    dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Exploration v2.4", "SG3.1":"DSP 3.1 v5.0" },
-    activityTemplate:"Exploration Activities v1.8", validationRuleset:"Exploratory Ruleset v1.1", raci:"Exploration RACI v1.6",
-    reportsBySG: { SG1:["Exploration Prospect Note"], SG2:["Feasibility Report"], "SG3.1":["Design & PEEP Pack"] },
+    dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Exploration v2.4", "SG3.1":"DSP 3.1 v5.0", "SG3.2":"DSP 3.2 Procurement v2.2", SG4:"DSP 4.0 Execution v1.0", SG5:"DSP 5.0 Closure v1.0" },
+    activityBySG: { SG1:"Exploration Activities v1.8", SG2:"SG2 Concept Selection Activities v1.5", "SG3.1":"SG3.1 Design Activities v1.3", "SG3.2":"SG3.2 Procurement Activities v1.0", SG4:"SG4 Execution Activities v1.0", SG5:"SG5 Closure Activities v1.0" },
+    validationRuleset:"Exploratory Ruleset v1.1", raci:"Exploration RACI v1.6",
+    reportsBySG: { SG1:["Exploration Prospect Note"], SG2:["Feasibility Report"], "SG3.1":["Design & PEEP Pack"], "SG3.2":["Procurement Status Report"], SG4:["Execution Performance Report"], SG5:["Project Close-out Report"] },
     assuranceReport: "CPA Assurance Report — Exploration v1.2",
     reviewPack: "Gate Review Pack — Exploration v1.3",
   },
   {
     id:"pt-multi", name:"Multi-Well Pad Template", v:"2.0", status:"Active",
-    dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Development v3.6", "SG3.1":"DSP 3.1 v5.0" },
-    activityTemplate:"Multi-Well Pad Activities v1.4", validationRuleset:"Standard Ruleset v1.4", raci:"Well Delivery RACI v2.0",
-    reportsBySG: { SG1:["Pad Identification Report"], SG2:["Pad Concept Report"], "SG3.1":["Pad Design Pack"] },
+    dspBySG: { SG1:"DSP 1.0 v4.1", SG2:"DSP 2.0 Development v3.6", "SG3.1":"DSP 3.1 v5.0", "SG3.2":"DSP 3.2 Procurement v2.2", SG4:"DSP 4.0 Execution v1.0", SG5:"DSP 5.0 Closure v1.0" },
+    activityBySG: { SG1:"Multi-Well Pad Activities v1.4", SG2:"SG2 Concept Selection Activities v1.5", "SG3.1":"SG3.1 Design Activities v1.3", "SG3.2":"SG3.2 Procurement Activities v1.0", SG4:"SG4 Execution Activities v1.0", SG5:"SG5 Closure Activities v1.0" },
+    validationRuleset:"Standard Ruleset v1.4", raci:"Well Delivery RACI v2.0",
+    reportsBySG: { SG1:["Pad Identification Report"], SG2:["Pad Concept Report"], "SG3.1":["Pad Design Pack"], "SG3.2":["Procurement Status Report"], SG4:["Execution Performance Report"], SG5:["Project Close-out Report"] },
     assuranceReport: "CPA Assurance Report — Multi-Well Pad v1.0",
     reviewPack: "Gate Review Pack — Multi-Well Pad v1.1",
   },
 ];
 
-const dspTemplateOptions = ["DSP 1.0 v4.1","DSP 2.0 Development v3.6","DSP 2.0 Exploration v2.4","DSP 3.1 v5.0","DSP 3.2 v2.2"];
-const activityTemplateOptions = ["Development Wells Activities v2.1","Exploration Activities v1.8","Multi-Well Pad Activities v1.4"];
+const dspTemplateOptionsBySG: Record<SG, string[]> = {
+  SG1: ["DSP 1.0 v4.1"],
+  SG2: ["DSP 2.0 Development v3.6","DSP 2.0 Exploration v2.4"],
+  "SG3.1": ["DSP 3.1 v5.0"],
+  "SG3.2": ["DSP 3.2 Procurement v2.2"],
+  SG4: ["DSP 4.0 Execution v1.0"],
+  SG5: ["DSP 5.0 Closure v1.0"],
+};
+const dspTemplateOptions = STAGE_GATES.flatMap(sg => dspTemplateOptionsBySG[sg]);
 const validationOptions = ["Standard Ruleset v1.4","Strict Ruleset v2.0","Exploratory Ruleset v1.1"];
 const raciOptions = ["Well Delivery RACI v2.0","Exploration RACI v1.6"];
 const assuranceReportOptions = ["CPA Assurance Report v3.0","CPA Assurance Report — Exploration v1.2","CPA Assurance Report — Multi-Well Pad v1.0"];
@@ -65,6 +75,9 @@ const initialDspTemplates = [
   { id:"dt-2", name:"DSP 2.0 Concept — Development", sg:"SG2" as SG, sections:33, v:"3.6" },
   { id:"dt-3", name:"DSP 2.0 Concept — Exploration", sg:"SG2" as SG, sections:29, v:"2.4" },
   { id:"dt-4", name:"DSP 3.1 Define / Design", sg:"SG3.1" as SG, sections:11, v:"5.0" },
+  { id:"dt-5", name:"DSP 3.2 Procurement", sg:"SG3.2" as SG, sections:11, v:"2.2" },
+  { id:"dt-6", name:"DSP 4.0 Execution", sg:"SG4" as SG, sections:15, v:"1.0" },
+  { id:"dt-7", name:"DSP 5.0 Closure", sg:"SG5" as SG, sections:9, v:"1.0" },
 ];
 
 const initialReportTemplates = [
@@ -73,19 +86,34 @@ const initialReportTemplates = [
   { id:"r-3", name:"Long Lead Item Report",      sg:"SG2" as SG,   fmt:"XLSX", scope:"All", owner:"Procurement" },
   { id:"r-4", name:"Design Pack",                sg:"SG3.1" as SG, fmt:"PPT",  scope:"All", owner:"Engineering A" },
   { id:"r-5", name:"RAROC Summary",              sg:"SG3.1" as SG, fmt:"PDF",  scope:"All", owner:"Planning" },
+  { id:"r-6", name:"Procurement Status Report",  sg:"SG3.2" as SG, fmt:"XLSX", scope:"All", owner:"Procurement" },
+  { id:"r-7", name:"Execution Performance Report", sg:"SG4" as SG, fmt:"PDF",  scope:"All", owner:"Drilling" },
+  { id:"r-8", name:"Monthly On-stream Connection Report", sg:"SG4" as SG, fmt:"XLSX", scope:"All", owner:"Engineering B" },
+  { id:"r-9", name:"Project Close-out Report",   sg:"SG5" as SG, fmt:"PDF",  scope:"All", owner:"Planning" },
 ];
 
 type ActivityRow = { id: string; name: string; description: string; deliverables: string; inputs: string; responsible: string; accountable: string; consulted: string; informed: string; timeline: string };
-type ActivityTemplate = { id: string; name: string; v: string; status: "Active"|"Draft"; activities: ActivityRow[] };
+type ActivityTemplate = { id: string; name: string; v: string; sg: SG; status: "Active"|"Draft"; activities: ActivityRow[] };
+const toRows = (sg: SG): ActivityRow[] => workActivitiesByStage[sg].map(a => ({
+  id: a.id, name: a.title, description: a.description ?? "", deliverables: "", inputs: "",
+  responsible: a.team ?? "", accountable: "Planning", consulted: "", informed: "CPA", timeline: "",
+}));
+const activityTplLabel = (t: ActivityTemplate) => `${t.name} v${t.v}`;
 
 const initialActivityTemplates: ActivityTemplate[] = [
-  { id:"at-1", name:"Development Wells Activities", v:"2.1", status:"Active", activities: [
+  { id:"at-1", name:"Development Wells Activities", v:"2.1", sg:"SG1", status:"Active", activities: [
     { id:"a1", name:"Well Profile Identification", description:"Establish target reservoir & profile.", deliverables:"Profile memo", inputs:"Field data", responsible:"IE", accountable:"IE Lead", consulted:"FD, RST", informed:"CPA", timeline:"2w" },
     { id:"a2", name:"Anti-Collision Assessment",   description:"Assess anti-collision risk vs existing wells.", deliverables:"AC Report", inputs:"Trajectory data", responsible:"Drilling", accountable:"D&W", consulted:"IE", informed:"CPA", timeline:"1w" },
   ]},
-  { id:"at-2", name:"Exploration Activities", v:"1.8", status:"Active", activities: [
+  { id:"at-2", name:"Exploration Activities", v:"1.8", sg:"SG1", status:"Active", activities: [
     { id:"a1", name:"Prospect Review", description:"Geological prospect review.", deliverables:"Prospect note", inputs:"Seismic", responsible:"PE1", accountable:"PE Lead", consulted:"PE2, PE3", informed:"CPA", timeline:"3w" },
   ]},
+  { id:"at-3", name:"Multi-Well Pad Activities", v:"1.4", sg:"SG1", status:"Active", activities: toRows("SG1") },
+  { id:"at-4", name:"SG2 Concept Selection Activities", v:"1.5", sg:"SG2", status:"Active", activities: toRows("SG2") },
+  { id:"at-5", name:"SG3.1 Design Activities", v:"1.3", sg:"SG3.1", status:"Active", activities: toRows("SG3.1") },
+  { id:"at-6", name:"SG3.2 Procurement Activities", v:"1.0", sg:"SG3.2", status:"Active", activities: toRows("SG3.2") },
+  { id:"at-7", name:"SG4 Execution Activities", v:"1.0", sg:"SG4", status:"Active", activities: toRows("SG4") },
+  { id:"at-8", name:"SG5 Closure Activities", v:"1.0", sg:"SG5", status:"Active", activities: toRows("SG5") },
 ];
 
 type ValidationRule = { id: string; text: string; severity: "info"|"warn"|"fail"; enforced: boolean };
@@ -166,15 +194,20 @@ function Templates(){
           </div>
           <table className="w-full text-sm">
             <thead className="bg-secondary/40 text-xs text-muted-foreground uppercase tracking-wider">
-              <tr>{["Project","Project Template","DSP Template (per SG)","Activity Template","Validation Ruleset","RACI",""].map(h=>(<th key={h} className="text-left px-4 py-3 font-medium">{h}</th>))}</tr>
+              <tr>{["Project","Project Template","DSP & Activity Template (per SG)","Validation Ruleset","RACI",""].map(h=>(<th key={h} className="text-left px-4 py-3 font-medium">{h}</th>))}</tr>
             </thead>
             <tbody className="divide-y divide-border text-xs">
               {projects.map(p=>(
                 <tr key={p.code} className="hover:bg-secondary/30">
                   <td className="px-4 py-3 font-medium">{p.code} — {p.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{projectTemplates[0].name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">SG1: DSP 1.0 · SG2: DSP 2.0 · SG3.1: DSP 3.1</td>
-                  <td className="px-4 py-3 text-muted-foreground">{projectTemplates[0].activityTemplate}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+                      {STAGE_GATES.map(sg=>(
+                        <><span key={`${sg}-k`} className="text-foreground font-medium">{sg}</span><span key={`${sg}-v`} className="truncate">{projectTemplates[0].dspBySG[sg]} · {projectTemplates[0].activityBySG[sg]}</span></>
+                      ))}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{projectTemplates[0].validationRuleset}</td>
                   <td className="px-4 py-3 text-muted-foreground">{projectTemplates[0].raci}</td>
                   <td className="px-4 py-3 text-right"><button onClick={()=>setEditAssignment(p.code)} className="text-primary text-xs flex items-center gap-1 ml-auto"><Edit3 className="h-3 w-3"/>Edit</button></td>
@@ -188,8 +221,8 @@ function Templates(){
       {tab==="projectTemplates" && (
         <>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs text-muted-foreground">All project templates. Each defines a DSP template per SG1/SG2/SG3.1, an activity template, a validation ruleset, RACI, and one or more report templates per stage gate.</div>
-            <button onClick={()=>setProjectTemplates([...projectTemplates, { id:`pt-new-${Date.now()}`, name:"New Project Template", v:"0.1", status:"Draft", dspBySG:{SG1:dspTemplateOptions[0],SG2:dspTemplateOptions[1],"SG3.1":dspTemplateOptions[3]}, activityTemplate:activityTemplateOptions[0], validationRuleset:validationOptions[0], raci:raciOptions[0], reportsBySG:{SG1:[],SG2:[],"SG3.1":[]}, assuranceReport:assuranceReportOptions[0], reviewPack:reviewPackOptions[0]}])} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1"><Plus className="h-3.5 w-3.5"/>Add Project Template</button>
+            <div className="text-xs text-muted-foreground">All project templates. Each defines, for every stage gate (SG1 to SG5), a DSP template, an activity template and one or more report templates, plus a validation ruleset and RACI.</div>
+            <button onClick={()=>setProjectTemplates([...projectTemplates, { id:`pt-new-${Date.now()}`, name:"New Project Template", v:"0.1", status:"Draft", dspBySG:bySG(sg=>dspTemplateOptionsBySG[sg][0]), activityBySG:bySG(sg=>{ const t = activityTemplates.find(a=>a.sg===sg); return t ? activityTplLabel(t) : ""; }), validationRuleset:validationOptions[0], raci:raciOptions[0], reportsBySG:bySG(()=>[]), assuranceReport:assuranceReportOptions[0], reviewPack:reviewPackOptions[0]}])} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs flex items-center gap-1"><Plus className="h-3.5 w-3.5"/>Add Project Template</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {projectTemplates.map(t=>(
@@ -203,7 +236,7 @@ function Templates(){
                 </div>
                 <div className="mt-3 space-y-1 text-[11px] text-muted-foreground">
                   {STAGE_GATES.map(sg=>(
-                    <div key={sg}><span className="text-foreground font-medium">{sg}:</span> {t.dspBySG[sg]} · {t.reportsBySG[sg]?.length ?? 0} report{(t.reportsBySG[sg]?.length ?? 0)===1?"":"s"}</div>
+                    <div key={sg}><span className="text-foreground font-medium">{sg}:</span> {t.dspBySG[sg]} · {t.activityBySG[sg] || "No activity template"} · {t.reportsBySG[sg]?.length ?? 0} report{(t.reportsBySG[sg]?.length ?? 0)===1?"":"s"}</div>
                   ))}
                   <div className="pt-1 mt-1 border-t border-border/50">
                     <div><span className="text-foreground font-medium">Assurance Report:</span> {t.assuranceReport}</div>
@@ -234,7 +267,7 @@ function Templates(){
           items={activityTemplates}
           onEdit={setActivityEditor}
           onDuplicate={duplicateActivity}
-          onAdd={()=>setActivityTemplates([...activityTemplates, { id:`at-${Date.now()}`, name:"New Activity Template", v:"0.1", status:"Draft", activities:[] }])}
+          onAdd={()=>setActivityTemplates([...activityTemplates, { id:`at-${Date.now()}`, name:"New Activity Template", v:"0.1", sg:"SG1", status:"Draft", activities:[] }])}
         />
       )}
 
@@ -259,11 +292,12 @@ function Templates(){
       {tab==="components" && <ComponentsTab />}
       {tab==="tags" && <AutoTagsTab />}
 
-      {editAssignment && <EditAssignmentModal code={editAssignment} projectTemplates={projectTemplates} onClose={()=>setEditAssignment(null)} />}
+      {editAssignment && <EditAssignmentModal code={editAssignment} projectTemplates={projectTemplates} activityTemplates={activityTemplates} onClose={()=>setEditAssignment(null)} />}
       {editProjectTemplate && (
         <EditProjectTemplateModal
           template={projectTemplates.find(t=>t.id===editProjectTemplate)!}
           reportOptions={reportTemplates}
+          activityTemplates={activityTemplates}
           onSave={(next)=>{ setProjectTemplates(projectTemplates.map(t=>t.id===next.id?next:t)); setEditProjectTemplate(null); }}
           onClose={()=>setEditProjectTemplate(null)}
         />
@@ -320,29 +354,49 @@ function SgFilter({ value, onChange }: { value: SG|"All"; onChange: (v: SG|"All"
   );
 }
 
-function EditAssignmentModal({ code, projectTemplates, onClose }: { code: string; projectTemplates: ProjectTemplate[]; onClose: () => void }) {
+function EditAssignmentModal({ code, projectTemplates, activityTemplates, onClose }: { code: string; projectTemplates: ProjectTemplate[]; activityTemplates: ActivityTemplate[]; onClose: () => void }) {
   const p = projects.find(x=>x.code===code)!;
   const [projectTpl, setProjectTpl] = useState(projectTemplates[0].id);
+  const tpl = projectTemplates.find(t=>t.id===projectTpl) ?? projectTemplates[0];
   return (
-    <Modal title={`Edit templates — ${p.code} ${p.name}`} onClose={onClose}>
+    <Modal title={`Edit templates — ${p.code} ${p.name}`} onClose={onClose} size="max-w-5xl">
       <label className="text-xs block mb-4">
         <div className="text-muted-foreground mb-1">Project Template</div>
         <select value={projectTpl} onChange={e=>setProjectTpl(e.target.value)} className="h-9 w-full rounded border border-border bg-input/60 text-xs px-2">
           {projectTemplates.map(t=><option key={t.id} value={t.id}>{t.name} · v{t.v}</option>)}
         </select>
       </label>
+      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">DSP & Activity Template by Stage Gate</div>
+      <div key={tpl.id} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
+        {STAGE_GATES.map(sg=>{
+          const acts = activityTemplates.filter(a=>a.sg===sg);
+          return (
+            <Panel key={sg} className="p-3">
+              <div className="text-xs font-semibold mb-2">{sg} <span className="text-muted-foreground font-normal">· {stageGatePhase[sg]}</span></div>
+              <label className="text-[11px] block mb-2">
+                <div className="text-muted-foreground mb-1">DSP Template</div>
+                <select defaultValue={tpl.dspBySG[sg]} className="h-8 w-full rounded border border-border bg-input/60 text-xs px-2">
+                  {dspTemplateOptionsBySG[sg].map(o=><option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label className="text-[11px] block">
+                <div className="text-muted-foreground mb-1">Activity Template</div>
+                <select defaultValue={tpl.activityBySG[sg]} className="h-8 w-full rounded border border-border bg-input/60 text-xs px-2">
+                  {(acts.length ? acts : activityTemplates).map(a=><option key={a.id}>{activityTplLabel(a)}</option>)}
+                </select>
+              </label>
+            </Panel>
+          );
+        })}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
-          ["DSP Template (SG1)", dspTemplateOptions],
-          ["DSP Template (SG2)", dspTemplateOptions],
-          ["DSP Template (SG3.1)", dspTemplateOptions],
-          ["Activity Template", activityTemplateOptions],
-          ["Validation Rule Set", validationOptions],
-          ["RACI", raciOptions],
-        ].map(([label, opts]) => (
+          ["Validation Rule Set", validationOptions, tpl.validationRuleset],
+          ["RACI", raciOptions, tpl.raci],
+        ].map(([label, opts, val]) => (
           <label key={label as string} className="text-xs">
             <div className="text-muted-foreground mb-1">{label as string}</div>
-            <select className="h-9 w-full rounded border border-border bg-input/60 text-xs px-2">
+            <select key={tpl.id} defaultValue={val as string} className="h-9 w-full rounded border border-border bg-input/60 text-xs px-2">
               {(opts as string[]).map(o=><option key={o}>{o}</option>)}
             </select>
           </label>
@@ -356,9 +410,10 @@ function EditAssignmentModal({ code, projectTemplates, onClose }: { code: string
   );
 }
 
-function EditProjectTemplateModal({ template, reportOptions, onSave, onClose }: { template: ProjectTemplate; reportOptions: typeof initialReportTemplates; onSave: (t: ProjectTemplate)=>void; onClose: () => void }) {
+function EditProjectTemplateModal({ template, reportOptions, activityTemplates, onSave, onClose }: { template: ProjectTemplate; reportOptions: typeof initialReportTemplates; activityTemplates: ActivityTemplate[]; onSave: (t: ProjectTemplate)=>void; onClose: () => void }) {
   const [draft, setDraft] = useState<ProjectTemplate>(template);
   const updateSG = (sg: SG, dsp: string) => setDraft({ ...draft, dspBySG: { ...draft.dspBySG, [sg]: dsp }});
+  const updateActivitySG = (sg: SG, act: string) => setDraft({ ...draft, activityBySG: { ...draft.activityBySG, [sg]: act }});
   const toggleReport = (sg: SG, r: string) => {
     const cur = draft.reportsBySG[sg] ?? [];
     const next = cur.includes(r) ? cur.filter(x=>x!==r) : [...cur, r];
@@ -374,12 +429,6 @@ function EditProjectTemplateModal({ template, reportOptions, onSave, onClose }: 
         <label className="text-xs">
           <div className="text-muted-foreground mb-1">Version</div>
           <input value={draft.v} onChange={e=>setDraft({...draft, v:e.target.value})} className="h-9 w-full rounded border border-border bg-input/60 px-2 text-xs"/>
-        </label>
-        <label className="text-xs">
-          <div className="text-muted-foreground mb-1">Activity Template</div>
-          <select value={draft.activityTemplate} onChange={e=>setDraft({...draft, activityTemplate:e.target.value})} className="h-9 w-full rounded border border-border bg-input/60 px-2 text-xs">
-            {activityTemplateOptions.map(o=><option key={o}>{o}</option>)}
-          </select>
         </label>
         <label className="text-xs">
           <div className="text-muted-foreground mb-1">Validation Ruleset</div>
@@ -407,15 +456,25 @@ function EditProjectTemplateModal({ template, reportOptions, onSave, onClose }: 
         </label>
       </div>
 
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">DSP Template & Reports by Stage Gate</div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        {STAGE_GATES.map(sg=>(
+      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">DSP Template, Activity Template & Reports by Stage Gate</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {STAGE_GATES.map(sg=>{
+          const acts = activityTemplates.filter(a=>a.sg===sg);
+          const actOptions = (acts.length ? acts : activityTemplates).map(activityTplLabel);
+          return (
           <Panel key={sg} className="p-3">
-            <div className="text-xs font-semibold mb-2">{sg}</div>
-            <label className="text-[11px] block mb-3">
+            <div className="text-xs font-semibold mb-2">{sg} <span className="text-muted-foreground font-normal">· {stageGatePhase[sg]}</span></div>
+            <label className="text-[11px] block mb-2">
               <div className="text-muted-foreground mb-1">DSP Template</div>
-              <select value={draft.dspBySG[sg]} onChange={e=>updateSG(sg, e.target.value)} className="h-8 w-full rounded border border-border bg-input/60 px-2 text-xs">
-                {dspTemplateOptions.map(o=><option key={o}>{o}</option>)}
+              <select value={draft.dspBySG[sg] ?? ""} onChange={e=>updateSG(sg, e.target.value)} className="h-8 w-full rounded border border-border bg-input/60 px-2 text-xs">
+                {(dspTemplateOptionsBySG[sg].includes(draft.dspBySG[sg]) ? dspTemplateOptionsBySG[sg] : [draft.dspBySG[sg], ...dspTemplateOptionsBySG[sg]].filter(Boolean)).map(o=><option key={o}>{o}</option>)}
+              </select>
+            </label>
+            <label className="text-[11px] block mb-3">
+              <div className="text-muted-foreground mb-1">Activity Template</div>
+              <select value={draft.activityBySG[sg] ?? ""} onChange={e=>updateActivitySG(sg, e.target.value)} className="h-8 w-full rounded border border-border bg-input/60 px-2 text-xs">
+                {!draft.activityBySG[sg] && <option value="">Select activity template…</option>}
+                {(actOptions.includes(draft.activityBySG[sg]) || !draft.activityBySG[sg] ? actOptions : [draft.activityBySG[sg], ...actOptions]).map(o=><option key={o}>{o}</option>)}
               </select>
             </label>
             <div className="text-[11px] text-muted-foreground mb-1">Reports (multiple)</div>
@@ -429,7 +488,8 @@ function EditProjectTemplateModal({ template, reportOptions, onSave, onClose }: 
               {reportOptions.filter(r=>r.sg===sg).length===0 && <div className="text-[11px] text-muted-foreground italic">No report templates for {sg} yet.</div>}
             </div>
           </Panel>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-5 flex justify-end gap-2">
@@ -685,20 +745,26 @@ function ReportBuilderModal({ report, dspTemplates, onClose }: { report: typeof 
 }
 
 function ActivityTemplatesTab({ items, onEdit, onDuplicate, onAdd }: { items: ActivityTemplate[]; onEdit: (id:string)=>void; onDuplicate: (id:string)=>void; onAdd: ()=>void }) {
+  const [sg, setSg] = useState<SG|"All">("All");
+  const filtered = items.filter(t=>sg==="All" || t.sg===sg);
   return (
     <Panel className="p-0 overflow-hidden">
-      <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+      <div className="px-5 py-3 border-b border-border flex items-center justify-between flex-wrap gap-2">
         <div className="text-sm font-semibold">Activity Templates</div>
+        <div className="flex items-center gap-3">
+        <SgFilter value={sg} onChange={setSg}/>
         <button onClick={onAdd} className="h-8 px-3 rounded bg-primary text-primary-foreground text-xs flex items-center gap-1"><Plus className="h-3.5 w-3.5"/>Add Activity Template</button>
+        </div>
       </div>
       <table className="w-full text-sm">
         <thead className="bg-secondary/40 text-xs text-muted-foreground uppercase tracking-wider">
-          <tr>{["Template","Version","Activities","Status",""].map(h=>(<th key={h} className="text-left px-4 py-3">{h}</th>))}</tr>
+          <tr>{["Template","Stage Gate","Version","Activities","Status",""].map(h=>(<th key={h} className="text-left px-4 py-3">{h}</th>))}</tr>
         </thead>
         <tbody className="divide-y divide-border text-xs">
-          {items.map(t=>(
+          {filtered.map(t=>(
             <tr key={t.id}>
               <td className="px-4 py-3 font-medium">{t.name}</td>
+              <td className="px-4 py-3"><StatusTag tone="blue">{t.sg} · {stageGatePhase[t.sg]}</StatusTag></td>
               <td className="px-4 py-3 font-mono">v{t.v}</td>
               <td className="px-4 py-3 text-muted-foreground">{t.activities.length}</td>
               <td className="px-4 py-3"><StatusTag tone={t.status==="Active"?"green":"grey"}>{t.status}</StatusTag></td>
@@ -724,6 +790,12 @@ function ActivityEditorModal({ template, onSave, onClose }: { template: Activity
       <label className="text-xs block mb-3">
         <div className="text-muted-foreground mb-1">Template Name</div>
         <input value={draft.name} onChange={e=>setDraft({...draft, name:e.target.value})} className="h-9 w-full max-w-md rounded border border-border bg-input/60 px-2 text-xs"/>
+      </label>
+      <label className="text-xs block mb-3">
+        <div className="text-muted-foreground mb-1">Stage Gate</div>
+        <select value={draft.sg} onChange={e=>setDraft({...draft, sg:e.target.value as SG})} className="h-9 w-full max-w-md rounded border border-border bg-input/60 px-2 text-xs">
+          {STAGE_GATES.map(s=><option key={s} value={s}>{s} - {stageGatePhase[s]}</option>)}
+        </select>
       </label>
       <div className="flex items-center justify-between mb-2">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Activities</div>
@@ -984,7 +1056,7 @@ function ProjectCharterPreview() {
             <td className={`${cell} bg-secondary/40 font-medium w-[16%]`}>Program title</td>
             <td className={cell}>{"{{Project_Name}}"}</td>
             <td className={`${cell} bg-secondary/40 font-medium w-[16%]`}>Start / End Date</td>
-            <td className={cell}>{"{{SG1_Date}}"} / {"{{SG32_Date}}"}</td>
+            <td className={cell}>{"{{SG1_Date}}"} / {"{{SG5_Date}}"}</td>
           </tr>
           <tr>
             <td className={`${cell} bg-secondary/40 font-medium`}>Classification</td>
@@ -1015,7 +1087,9 @@ function ProjectCharterPreview() {
               <div>SG 1.0 Assess · {"{{SG1_Date}}"}</div>
               <div>SG 2.0 Select · {"{{SG2_Date}}"}</div>
               <div>SG 3.1 Define/Design · {"{{SG31_Date}}"}</div>
-              <div>SG 3.2 Define/Procure · {"{{SG32_Date}}"}</div>
+              <div>SG 3.2 Procurement · {"{{SG32_Date}}"}</div>
+              <div>SG 4 Execution · {"{{SG4_Date}}"}</div>
+              <div>SG 5 Closure · {"{{SG5_Date}}"}</div>
             </td>
           </tr>
           <tr><td className={cell} colSpan={3}>Signature block · KOC #</td></tr>
