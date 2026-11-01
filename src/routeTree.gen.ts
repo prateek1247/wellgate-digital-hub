@@ -9,80 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WorkloadRouteImport } from './routes/workload'
-import { Route as WellSchematicsRouteImport } from './routes/well-schematics'
-import { Route as WellMontageRouteImport } from './routes/well-montage'
-import { Route as WellDesignsRouteImport } from './routes/well-designs'
-import { Route as TemplatesRouteImport } from './routes/templates'
-import { Route as TeamsRouteImport } from './routes/teams'
-import { Route as StageGatesRouteImport } from './routes/stage-gates'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as CpaRouteImport } from './routes/cpa'
-import { Route as ApprovalsRouteImport } from './routes/approvals'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActivitiesRouteImport } from './routes/activities'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ApprovalsRouteImport } from './routes/approvals'
+import { Route as CpaRouteImport } from './routes/cpa'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as StageGatesRouteImport } from './routes/stage-gates'
+import { Route as TeamsRouteImport } from './routes/teams'
+import { Route as TemplatesRouteImport } from './routes/templates'
+import { Route as WellDesignsRouteImport } from './routes/well-designs'
+import { Route as WellMontageRouteImport } from './routes/well-montage'
+import { Route as WellSchematicsRouteImport } from './routes/well-schematics'
+import { Route as WorkloadRouteImport } from './routes/workload'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
-const WorkloadRoute = WorkloadRouteImport.update({
-  id: '/workload',
-  path: '/workload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WellSchematicsRoute = WellSchematicsRouteImport.update({
-  id: '/well-schematics',
-  path: '/well-schematics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WellMontageRoute = WellMontageRouteImport.update({
-  id: '/well-montage',
-  path: '/well-montage',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WellDesignsRoute = WellDesignsRouteImport.update({
-  id: '/well-designs',
-  path: '/well-designs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TemplatesRoute = TemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TeamsRoute = TeamsRouteImport.update({
-  id: '/teams',
-  path: '/teams',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StageGatesRoute = StageGatesRouteImport.update({
-  id: '/stage-gates',
-  path: '/stage-gates',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CpaRoute = CpaRouteImport.update({
-  id: '/cpa',
-  path: '/cpa',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApprovalsRoute = ApprovalsRouteImport.update({
-  id: '/approvals',
-  path: '/approvals',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivitiesRoute = ActivitiesRouteImport.update({
@@ -90,9 +35,64 @@ const ActivitiesRoute = ActivitiesRouteImport.update({
   path: '/activities',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApprovalsRoute = ApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CpaRoute = CpaRouteImport.update({
+  id: '/cpa',
+  path: '/cpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StageGatesRoute = StageGatesRouteImport.update({
+  id: '/stage-gates',
+  path: '/stage-gates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamsRoute = TeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WellDesignsRoute = WellDesignsRouteImport.update({
+  id: '/well-designs',
+  path: '/well-designs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WellMontageRoute = WellMontageRouteImport.update({
+  id: '/well-montage',
+  path: '/well-montage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WellSchematicsRoute = WellSchematicsRouteImport.update({
+  id: '/well-schematics',
+  path: '/well-schematics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadRoute = WorkloadRouteImport.update({
+  id: '/workload',
+  path: '/workload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -227,88 +227,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/workload': {
-      id: '/workload'
-      path: '/workload'
-      fullPath: '/workload'
-      preLoaderRoute: typeof WorkloadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/well-schematics': {
-      id: '/well-schematics'
-      path: '/well-schematics'
-      fullPath: '/well-schematics'
-      preLoaderRoute: typeof WellSchematicsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/well-montage': {
-      id: '/well-montage'
-      path: '/well-montage'
-      fullPath: '/well-montage'
-      preLoaderRoute: typeof WellMontageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/well-designs': {
-      id: '/well-designs'
-      path: '/well-designs'
-      fullPath: '/well-designs'
-      preLoaderRoute: typeof WellDesignsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates': {
-      id: '/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof TemplatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/teams': {
-      id: '/teams'
-      path: '/teams'
-      fullPath: '/teams'
-      preLoaderRoute: typeof TeamsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stage-gates': {
-      id: '/stage-gates'
-      path: '/stage-gates'
-      fullPath: '/stage-gates'
-      preLoaderRoute: typeof StageGatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cpa': {
-      id: '/cpa'
-      path: '/cpa'
-      fullPath: '/cpa'
-      preLoaderRoute: typeof CpaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/approvals': {
-      id: '/approvals'
-      path: '/approvals'
-      fullPath: '/approvals'
-      preLoaderRoute: typeof ApprovalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activities': {
@@ -318,11 +241,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActivitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/approvals': {
+      id: '/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof ApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cpa': {
+      id: '/cpa'
+      path: '/cpa'
+      fullPath: '/cpa'
+      preLoaderRoute: typeof CpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stage-gates': {
+      id: '/stage-gates'
+      path: '/stage-gates'
+      fullPath: '/stage-gates'
+      preLoaderRoute: typeof StageGatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teams': {
+      id: '/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof TeamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-designs': {
+      id: '/well-designs'
+      path: '/well-designs'
+      fullPath: '/well-designs'
+      preLoaderRoute: typeof WellDesignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-montage': {
+      id: '/well-montage'
+      path: '/well-montage'
+      fullPath: '/well-montage'
+      preLoaderRoute: typeof WellMontageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-schematics': {
+      id: '/well-schematics'
+      path: '/well-schematics'
+      fullPath: '/well-schematics'
+      preLoaderRoute: typeof WellSchematicsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload': {
+      id: '/workload'
+      path: '/workload'
+      fullPath: '/workload'
+      preLoaderRoute: typeof WorkloadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {

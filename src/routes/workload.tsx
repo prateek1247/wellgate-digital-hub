@@ -14,6 +14,10 @@ import {
   appUsers,
   autoTextTags,
   changeLog,
+  STAGE_GATES,
+  stageGatePhase,
+  stageGateToDsp,
+  type StageGate,
   type WorkActivity,
 } from "@/lib/mock";
 import {
@@ -48,7 +52,7 @@ import {
   Check,
 } from "lucide-react";
 
-type Stage = "SG1" | "SG2" | "SG3.1" | "SG3.2";
+type Stage = StageGate;
 
 export const Route = createFileRoute("/workload")({
   head: () => ({
@@ -60,9 +64,7 @@ export const Route = createFileRoute("/workload")({
   component: WorkloadPage,
 });
 
-const stageToDsp: Record<Stage, keyof typeof dspSections> = {
-  SG1: "1.0", SG2: "2.0", "SG3.1": "3.1", "SG3.2": "3.2",
-};
+const stageToDsp: Record<Stage, keyof typeof dspSections> = stageGateToDsp;
 
 const CURRENT_USER = "Prateek S. (me)";
 
@@ -142,13 +144,13 @@ function WorkloadPage() {
       {/* Stage gate tabs + version */}
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <div className="flex gap-1 text-xs">
-          {(["SG1", "SG2", "SG3.1", "SG3.2"] as Stage[]).map(s => (
+          {STAGE_GATES.map(s => (
             <button
               key={s}
               onClick={() => { setStage(s); setVersion(stageVersions[s][0]); }}
               className={`px-3 py-1.5 rounded-md border ${stage === s ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}
             >
-              {s}
+              {s} <span className="opacity-70">· {stageGatePhase[s]}</span>
             </button>
           ))}
         </div>
@@ -421,7 +423,7 @@ function seedNode(id: string, title: string, i: number): DspNode {
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const isOverdue = (n: DspNode) => !!n.target && n.target < TODAY && n.status !== "completed";
-const prevStage: Record<Stage, Stage | null> = { SG1: null, SG2: "SG1", "SG3.1": "SG2", "SG3.2": "SG3.1" };
+const prevStage = Object.fromEntries(STAGE_GATES.map((s, i) => [s, i === 0 ? null : STAGE_GATES[i - 1]])) as Record<Stage, Stage | null>;
 
 function DspEditor({ stage, sections, setSections, selectedId, setSelectedId, openReminder, onOpenTagValues, tagValues }: {
   stage: Stage;

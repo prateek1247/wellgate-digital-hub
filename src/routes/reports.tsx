@@ -31,6 +31,8 @@ function Reports(){
             <Bar label="SG2.0" value={45}/>
             <Bar label="SG3.1" value={60}/>
             <Bar label="SG3.2" value={30}/>
+            <Bar label="SG4" value={15}/>
+            <Bar label="SG5" value={5}/>
           </div>
         </Panel>
 

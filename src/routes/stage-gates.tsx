@@ -1,22 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel, StatusDot, StatusTag } from "@/components/shell";
-import { dspSections, dsp31Design, projects, workActivitiesByStage } from "@/lib/mock";
+import { dspSections, dsp31Design, projects, workActivitiesByStage, STAGE_GATES, stageGatePhase, stageGateToDsp, type StageGate } from "@/lib/mock";
 
-const stages = [
-  { id: "1.0", name: "SG1.0 Identification" },
-  { id: "2.0", name: "SG2.0 Concept Selection" },
-  { id: "3.1", name: "SG3.1 Define / Design" },
-  { id: "3.2", name: "SG3.2 Validation / Procurement" },
-] as const;
+const stages = STAGE_GATES.map(sg => ({ id: stageGateToDsp[sg], sg, name: `${sg} - ${stageGatePhase[sg]}` }));
+type DspKey = string;
+const dspToStage = (id: DspKey): StageGate => stages.find(s => s.id === id)?.sg ?? "SG1";
 
 export const Route = createFileRoute("/stage-gates")({
-  head: () => ({ meta: [{ title: "Stage Gate Tracker — WDPGS" }, { name: "description", content: "Track SG1.0 through SG3.2 stage gate readiness." }] }),
+  head: () => ({ meta: [{ title: "Stage Gate Tracker — WDPGS" }, { name: "description", content: "Track SG1 through SG5 stage gate readiness: identification, concept, design, procurement, execution and closure." }] }),
   component: StageGates,
 });
 
 function StageGates() {
-  const [stage, setStage] = useState<"1.0"|"2.0"|"3.1"|"3.2">("1.0");
+  const [stage, setStage] = useState<DspKey>("1.0");
   const meta = dspSections[stage];
   const project = projects[0];
 
@@ -97,18 +94,11 @@ function StageGates() {
           <Panel className="p-4">
             <div className="text-sm font-semibold mb-3">Stage Activities</div>
             <div className="space-y-2 text-xs">
-              {(stage==="1.0"
-                ? ["Well Profile Identification","Preliminary SS X,Y","Surface X,Y","PAD Allocations","Site Visits","Surface Initial Confirmation","Side-tracks","Anti-Collision Assessment"]
-                : stage==="2.0"
-                ? ["Feasibility Study","Concept Options Ranking","Reservoir Simulation Review","Long Lead Items Identification"]
-                : stage==="3.1"
-                ? ["Design Audit Report","Execution Plan Development","ITB Documentation","PEEP Run"]
-                : ["Procurement Readiness","HSE Readiness Validation","Facility Readiness","Assurance Findings Closure"]
-              ).map((a,i)=>(
-                <div key={a} className="flex items-center justify-between border border-border rounded-md px-3 py-2">
-                  <div className="flex items-center gap-2"><StatusDot status={i%3===0?"completed":i%3===1?"in-progress":"not-started"}/>{a}</div>
-                  <span className="text-[10px] text-muted-foreground">2026-08-{10+i}</span>
-                </div>
+              {workActivitiesByStage[dspToStage(stage)].map(a=>(
+                <Link key={a.id} to="/workload" className="flex items-center justify-between gap-2 border border-border rounded-md px-3 py-2 hover:border-primary/40 hover:bg-primary/5 transition">
+                  <div className="flex items-center gap-2 min-w-0"><StatusDot status={a.status}/><span className="truncate">{a.title}</span></div>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{a.target ?? "—"}</span>
+                </Link>
               ))}
             </div>
           </Panel>
@@ -140,7 +130,7 @@ function StageGates() {
       {/* Stage history */}
       <Panel className="p-5 mt-4">
         <div className="text-sm font-semibold mb-3">Stage History Timeline</div>
-        <div className="grid grid-cols-4 gap-3 text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 text-xs">
           {stages.map((s,i)=>(
             <div key={s.id} className={`p-3 rounded-md border ${stage===s.id?"border-primary/40 bg-primary/5":"border-border"}`}>
               <div className="flex items-center gap-2 font-medium">
@@ -185,9 +175,8 @@ function SectionProgress({ total }: { total: number }) {
   );
 }
 
-function ActivityGantt({ stage }: { stage: "1.0"|"2.0"|"3.1"|"3.2" }) {
-  const key = stage === "1.0" ? "SG1" : stage === "2.0" ? "SG2" : stage === "3.1" ? "SG3.1" : "SG3.2";
-  const acts = workActivitiesByStage[key as "SG1"|"SG2"|"SG3.1"|"SG3.2"];
+function ActivityGantt({ stage }: { stage: DspKey }) {
+  const acts = workActivitiesByStage[dspToStage(stage)];
   const [onlyDelayed, setOnlyDelayed] = useState(false);
   const today = new Date();
   const parsed = acts.map((a, i) => {

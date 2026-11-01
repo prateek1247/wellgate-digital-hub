@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel } from "@/components/shell";
+import type { StageGate } from "@/lib/mock";
 import {
   LayoutGrid,
   List,
@@ -26,7 +27,7 @@ type TLProject = {
   status: TLStatus;
   start: string; // dd.mm.yyyy
   end: string;
-  stageGate: "SG1" | "SG2" | "SG3.1";
+  stageGate: StageGate;
   favourite?: boolean;
   mine?: boolean;
 };
@@ -37,9 +38,9 @@ const timelineProjects: TLProject[] = [
   { name: "Exploration Well Alpha", status: "Initiating", start: "01.10.2026", end: "29.12.2027", stageGate: "SG2", favourite: true, mine: true },
   { name: "Exploration Well Beta", status: "Initiating", start: "02.10.2026", end: "29.01.2028", stageGate: "SG2", favourite: true },
   { name: "Exploration Well Zulu", status: "Initiating", start: "01.12.2026", end: "28.02.2028", stageGate: "SG1" },
-  { name: "Permian - 20 Well PAD", status: "Initiating", start: "12.05.2026", end: "06.10.2026", stageGate: "SG3.1", mine: true },
+  { name: "Permian - 20 Well PAD", status: "Initiating", start: "12.05.2026", end: "06.10.2026", stageGate: "SG4", mine: true },
   { name: "Rockies - Multi PAD Wells", status: "Initiating", start: "24.02.2026", end: "19.01.2027", stageGate: "SG2" },
-  { name: "Rig plan", status: "Initiating", start: "01.01.2026", end: "13.02.2026", stageGate: "SG3.1" },
+  { name: "Rig plan", status: "Initiating", start: "01.01.2026", end: "13.02.2026", stageGate: "SG5" },
   { name: "SC Demo", status: "Initiating", start: "16.12.2025", end: "30.09.2026", stageGate: "SG2", favourite: true },
   { name: "Test1", status: "Initiating", start: "01.01.2026", end: "31.03.2027", stageGate: "SG1" },
   { name: "Burgan Infill Program", status: "Active", start: "10.03.2026", end: "18.11.2027", stageGate: "SG3.1" },
@@ -51,15 +52,15 @@ const timelineProjects: TLProject[] = [
   { name: "North Kuwait Gas Lift", status: "Initiating", start: "01.02.2026", end: "15.09.2026", stageGate: "SG1" },
   { name: "Bahra Development Wells", status: "Initiating", start: "10.06.2026", end: "22.04.2027", stageGate: "SG1", mine: true },
   { name: "Wafra Joint Wells", status: "Initiating", start: "05.08.2026", end: "18.10.2027", stageGate: "SG2" },
-  { name: "Ahmadi Workover Batch", status: "Initiating", start: "14.03.2026", end: "30.08.2026", stageGate: "SG3.1" },
+  { name: "Ahmadi Workover Batch", status: "Initiating", start: "14.03.2026", end: "30.08.2026", stageGate: "SG4" },
   { name: "Jurassic Deep Test 4", status: "Initiating", start: "22.09.2026", end: "12.05.2027", stageGate: "SG1" },
   { name: "Sabriyah Multi-Pad B", status: "Initiating", start: "01.11.2026", end: "20.12.2027", stageGate: "SG1" },
   { name: "Rawdhatain HP Well Release", status: "Initiating", start: "08.04.2026", end: "16.10.2026", stageGate: "SG2" },
   { name: "Marat Deep Exploration", status: "Initiating", start: "18.07.2026", end: "05.03.2028", stageGate: "SG1" },
-  { name: "West Kuwait Slim Hole", status: "Initiating", start: "26.01.2026", end: "14.11.2026", stageGate: "SG3.1" },
+  { name: "West Kuwait Slim Hole", status: "Initiating", start: "26.01.2026", end: "14.11.2026", stageGate: "SG3.2" },
   { name: "Umm Niqa Appraisal", status: "Initiating", start: "03.10.2026", end: "22.09.2027", stageGate: "SG2" },
   { name: "Kra Al-Maru Step-out", status: "Initiating", start: "15.05.2026", end: "10.02.2027", stageGate: "SG2" },
-  { name: "Greater Burgan Pad-27", status: "Initiating", start: "01.03.2026", end: "01.09.2027", stageGate: "SG3.1" },
+  { name: "Greater Burgan Pad-27", status: "Initiating", start: "01.03.2026", end: "01.09.2027", stageGate: "SG3.2" },
 ];
 
 const QUARTERS: { label: string; year: number; q: number }[] = (() => {
@@ -88,9 +89,11 @@ function todayQIndex(): number {
   return toQIndex(`${dd}.${mm}.${yyyy}`);
 }
 
-function stageTone(s: "SG1"|"SG2"|"SG3.1") {
+function stageTone(s: StageGate) {
   if (s === "SG1") return "border-primary/40 text-primary bg-primary/10";
   if (s === "SG2") return "border-[color:var(--status-orange)]/40 text-[color:var(--status-orange)] bg-[color:var(--status-orange)]/10";
+  if (s === "SG3.2") return "border-[color:var(--status-yellow)]/40 text-[color:var(--status-yellow)] bg-[color:var(--status-yellow)]/10";
+  if (s === "SG4" || s === "SG5") return "border-muted-foreground/40 text-foreground bg-secondary";
   return "border-[color:var(--status-green)]/40 text-[color:var(--status-green)] bg-[color:var(--status-green)]/10";
 }
 
@@ -154,7 +157,7 @@ function ProjectsPage() {
     <div className="p-6 xl:p-8 max-w-[1800px] mx-auto">
       <PageHeader
         title="Projects"
-        subtitle="All KOC well delivery projects with lifecycle timelines across SG1.0 → SG3.2."
+        subtitle="All KOC well delivery projects with lifecycle timelines across SG1 → SG5 (Identification to Closure)."
         actions={
           <>
             <div className="flex rounded-md border border-border overflow-hidden">
@@ -354,7 +357,7 @@ function Wizard({ onClose }: { onClose: () => void }) {
           )}
           {step===2 && (
             <div className="grid grid-cols-2 gap-3">
-              {["Project name","Asset / field","Directorate","Budget year","Number of wells","Well type","Reservoir / target","Project start date","Target SG1 date","Target SG2 date","Target SG3.1 date","Target SG3.2 date"].map(f=>(
+              {["Project name","Asset / field","Directorate","Budget year","Number of wells","Well type","Reservoir / target","Project start date","Target SG1 date","Target SG2 date","Target SG3.1 date","Target SG3.2 date","Target SG4 date","Target SG5 date"].map(f=>(
                 <div key={f}>
                   <div className="text-[11px] text-muted-foreground mb-1">{f}</div>
                   <input className="w-full h-9 rounded-md bg-input/60 border border-border px-2"/>
@@ -364,7 +367,7 @@ function Wizard({ onClose }: { onClose: () => void }) {
           )}
           {step===3 && (
             <div className="space-y-2">
-              {["SG1 Development Template","SG2 Development Template","SG2 Exploration Template","SG3.1 Development Template","SG3.2 Procurement / Validation Template"].map(t=>(
+              {["SG1 Development Template","SG2 Development Template","SG2 Exploration Template","SG3.1 Development Template","SG3.2 Procurement Template","SG4 Execution Template","SG5 Closure Template"].map(t=>(
                 <label key={t} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:border-primary/40">
                   <input type="checkbox" className="accent-[color:var(--accent-blue)]"/>{t}
                 </label>
