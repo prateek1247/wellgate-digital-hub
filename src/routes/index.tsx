@@ -96,7 +96,7 @@ function Index() {
               </div>
 
               <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-3 text-[11px]">
+                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-[11px]">
                   <span className="flex items-center gap-1.5"><StatusDot status={p.sg1} /> SG1</span>
                   <span className="flex items-center gap-1.5"><StatusDot status={p.sg2} /> SG2</span>
                   <span className="flex items-center gap-1.5"><StatusDot status={p.sg31} /> SG3.1</span>

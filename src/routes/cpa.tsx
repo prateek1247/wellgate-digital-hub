@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageHeader, Panel, StatusTag } from "@/components/shell";
-import { projects } from "@/lib/mock";
+import { projects, STAGE_GATES, stageGatePhase } from "@/lib/mock";
 import { FileDown, Send, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/cpa")({
