@@ -26,7 +26,7 @@ type TLProject = {
   status: TLStatus;
   start: string; // dd.mm.yyyy
   end: string;
-  stageGate: "SG1" | "SG2" | "SG3.1";
+  stageGate: StageGate;
   favourite?: boolean;
   mine?: boolean;
 };
@@ -88,9 +88,11 @@ function todayQIndex(): number {
   return toQIndex(`${dd}.${mm}.${yyyy}`);
 }
 
-function stageTone(s: "SG1"|"SG2"|"SG3.1") {
+function stageTone(s: StageGate) {
   if (s === "SG1") return "border-primary/40 text-primary bg-primary/10";
   if (s === "SG2") return "border-[color:var(--status-orange)]/40 text-[color:var(--status-orange)] bg-[color:var(--status-orange)]/10";
+  if (s === "SG3.2") return "border-[color:var(--status-yellow)]/40 text-[color:var(--status-yellow)] bg-[color:var(--status-yellow)]/10";
+  if (s === "SG4" || s === "SG5") return "border-muted-foreground/40 text-foreground bg-secondary";
   return "border-[color:var(--status-green)]/40 text-[color:var(--status-green)] bg-[color:var(--status-green)]/10";
 }
 
@@ -154,7 +156,7 @@ function ProjectsPage() {
     <div className="p-6 xl:p-8 max-w-[1800px] mx-auto">
       <PageHeader
         title="Projects"
-        subtitle="All KOC well delivery projects with lifecycle timelines across SG1.0 → SG3.2."
+        subtitle="All KOC well delivery projects with lifecycle timelines across SG1 → SG5 (Identification to Closure)."
         actions={
           <>
             <div className="flex rounded-md border border-border overflow-hidden">
@@ -354,7 +356,7 @@ function Wizard({ onClose }: { onClose: () => void }) {
           )}
           {step===2 && (
             <div className="grid grid-cols-2 gap-3">
-              {["Project name","Asset / field","Directorate","Budget year","Number of wells","Well type","Reservoir / target","Project start date","Target SG1 date","Target SG2 date","Target SG3.1 date","Target SG3.2 date"].map(f=>(
+              {["Project name","Asset / field","Directorate","Budget year","Number of wells","Well type","Reservoir / target","Project start date","Target SG1 date","Target SG2 date","Target SG3.1 date","Target SG3.2 date","Target SG4 date","Target SG5 date"].map(f=>(
                 <div key={f}>
                   <div className="text-[11px] text-muted-foreground mb-1">{f}</div>
                   <input className="w-full h-9 rounded-md bg-input/60 border border-border px-2"/>
@@ -364,7 +366,7 @@ function Wizard({ onClose }: { onClose: () => void }) {
           )}
           {step===3 && (
             <div className="space-y-2">
-              {["SG1 Development Template","SG2 Development Template","SG2 Exploration Template","SG3.1 Development Template","SG3.2 Procurement / Validation Template"].map(t=>(
+              {["SG1 Development Template","SG2 Development Template","SG2 Exploration Template","SG3.1 Development Template","SG3.2 Procurement Template","SG4 Execution Template","SG5 Closure Template"].map(t=>(
                 <label key={t} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:border-primary/40">
                   <input type="checkbox" className="accent-[color:var(--accent-blue)]"/>{t}
                 </label>
