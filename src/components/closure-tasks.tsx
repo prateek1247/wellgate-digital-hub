@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Plus, Trash2, ArrowRightCircle } from "lucide-react";
 import { Panel, StatusTag } from "@/components/shell";
+import { STAGE_GATES, type StageGate } from "@/lib/mock";
 
-type Stage = "SG1" | "SG2" | "SG3.1" | "SG3.2";
-const STAGES: Stage[] = ["SG1", "SG2", "SG3.1", "SG3.2"];
+type Stage = StageGate;
+const STAGES: readonly Stage[] = STAGE_GATES;
 type TaskStatus = "Open" | "In Progress" | "Closed";
 export type ClosureTask = { id: string; comment: string; raisedAt: Stage; targetStage: Stage; owner: string; due: string; status: TaskStatus };
 
