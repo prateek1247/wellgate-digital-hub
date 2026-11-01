@@ -101,6 +101,8 @@ function Index() {
                   <span className="flex items-center gap-1.5"><StatusDot status={p.sg2} /> SG2</span>
                   <span className="flex items-center gap-1.5"><StatusDot status={p.sg31} /> SG3.1</span>
                   <span className="flex items-center gap-1.5"><StatusDot status={p.sg32} /> SG3.2</span>
+                  <span className="flex items-center gap-1.5"><StatusDot status={p.sg4} /> SG4</span>
+                  <span className="flex items-center gap-1.5"><StatusDot status={p.sg5} /> SG5</span>
                 </div>
                 <span className={`text-[11px] font-medium ${p.daysRemaining < 0 ? "text-[color:var(--status-red)]" : "text-muted-foreground"}`}>
                   <Calendar className="h-3 w-3 inline mr-1" />

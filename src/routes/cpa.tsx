@@ -208,7 +208,7 @@ function ClarificationTracker() {
 }
 
 function ProjectTracker() {
-  const stages = ["SG1", "SG2", "SG3.1", "SG3.2"] as const;
+  const stages = STAGE_GATES;
   const [remarks, setRemarks] = useState<Record<string, Record<string, string>>>(() => {
     const seed: Record<string, Record<string, string>> = {};
     projects.forEach(p => {
@@ -217,6 +217,8 @@ function ProjectTracker() {
         SG2: p.stageGate === "SG3.1" || p.stageGate === "SG3.2" ? "Closed — concept ranking endorsed. Refer to CPA memo 2026/04-11." : "",
         "SG3.1": p.stageGate === "SG3.2" ? "Closed — design deliverables verified." : "",
         "SG3.2": "",
+        SG4: "",
+        SG5: "",
       };
     });
     return seed;
@@ -236,7 +238,7 @@ function ProjectTracker() {
           {projects.map(p => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
         </select>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {stages.map(s => {
           const current = projects.find(p => p.code === openProject)!;
           const isPast = stages.indexOf(s) < stages.indexOf(current.stageGate as any);
@@ -245,7 +247,7 @@ function ProjectTracker() {
           return (
             <div key={s} className="border border-border rounded-lg p-3 bg-secondary/20">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-xs font-semibold">{s}</div>
+                <div className="text-xs font-semibold">{s} <span className="text-muted-foreground font-normal">· {stageGatePhase[s]}</span></div>
                 <StatusTag tone={tone as any}>{isPast ? "Closed" : isCurrent ? "In Progress" : "Upcoming"}</StatusTag>
               </div>
               <label className="text-[10px] text-muted-foreground">Closure Remark</label>
