@@ -64,7 +64,6 @@ const dspTemplateOptionsBySG: Record<SG, string[]> = {
   SG4: ["DSP 4.0 Execution v1.0"],
   SG5: ["DSP 5.0 Closure v1.0"],
 };
-const dspTemplateOptions = STAGE_GATES.flatMap(sg => dspTemplateOptionsBySG[sg]);
 const validationOptions = ["Standard Ruleset v1.4","Strict Ruleset v2.0","Exploratory Ruleset v1.1"];
 const raciOptions = ["Well Delivery RACI v2.0","Exploration RACI v1.6"];
 const assuranceReportOptions = ["CPA Assurance Report v3.0","CPA Assurance Report — Exploration v1.2","CPA Assurance Report — Multi-Well Pad v1.0"];
@@ -202,9 +201,9 @@ function Templates(){
                   <td className="px-4 py-3 font-medium">{p.code} — {p.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{projectTemplates[0].name}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+                    <div className="space-y-0.5 text-[11px]">
                       {STAGE_GATES.map(sg=>(
-                        <><span key={`${sg}-k`} className="text-foreground font-medium">{sg}</span><span key={`${sg}-v`} className="truncate">{projectTemplates[0].dspBySG[sg]} · {projectTemplates[0].activityBySG[sg]}</span></>
+                        <div key={sg} className="flex gap-2"><span className="text-foreground font-medium w-10 shrink-0">{sg}</span><span className="truncate">{projectTemplates[0].dspBySG[sg]} · {projectTemplates[0].activityBySG[sg]}</span></div>
                       ))}
                     </div>
                   </td>
