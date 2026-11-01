@@ -9,7 +9,9 @@ The Well Delivery Project Gate System (WDPGS) is an advisory & enablement platfo
 - SG1 (1.0 Identification): opportunity framing, preliminary well concept, cost class 5 estimate.
 - SG2 (2.0 Concept Selection): alternative concepts, selection rationale, risk register, class 4 estimate.
 - SG3.1 (Design): detailed well design, trajectory, casing design, long lead items, class 3 estimate.
-- SG3.2 (Validation): design validation, execution readiness, final DSP for Gate Keeper.
+- SG3.2 (Procurement): design validation, procurement and long lead items status, execution readiness.
+- SG4 (Execution): yearly well release, PDDP, 2PP, location readiness, rig movement and drilling, operation performance, on-stream connection performance target as per NK Conn. Plan (monthly), production performance.
+- SG5 (Closure): deliverables aligned with the Business Plan (BP) and handover of wells to the asset.
 
 ## 3. Gate workflow
 Each stage runs through: Prepare DSP → Submit DSP → Conduct Assurance Review → Request Stage Gate Review → Stage Gate Meeting Review. Pills are green (done), amber (in progress) or grey (not started).
@@ -18,9 +20,9 @@ Workload status values: Not Started, In Progress, Submitted to Planning, CPA Rev
 ## 4. Pages
 - Dashboard: KPIs and active project tiles. Clicking a tile opens that project's Workload. Progress bars show start, today and end dates.
 - Projects: Gantt timeline of all projects with stage gate column and a red "today" line. Use "New Project" to launch the creation wizard.
-- Workload: the main working area per project. Tabs: Activity Tracker, DSP, Meetings, Closure Tasks. Choose stage gate (SG1–SG3.2) and version at the top.
+- Workload: the main working area per project. Tabs: Activity Tracker, DSP, Meetings, Closure Tasks. Choose stage gate (SG1, SG2, SG3.1, SG3.2 Procurement, SG4 Execution, SG5 Closure) and version at the top.
 - Automated Well Designs, Create Well Schematics, Well Montage: engineering tools for design checks, schematic drawing and composite sheets.
-- Templates and Rules: project templates (per-stage DSP, activity, validation, RACI, reports, assurance report, review pack), DSP builder, report builder, components (tables, Project Charter, Long Lead Items), auto text tags, validation rules.
+- Templates and Rules: project templates (for each stage gate SG1 to SG5: DSP template, activity template and reports; plus validation, RACI, assurance report, review pack), DSP builder, report builder, components (tables, Project Charter, Long Lead Items), auto text tags, validation rules.
 - Activity Library, Stage Gate Tracker (DSP progress, activity Gantt with delayed filter), User Access, Approvals, CPA Governance (work queue, clarification tracker, project tracker with closure remarks), Reports and KPIs.
 
 ## 5. Working in the DSP
